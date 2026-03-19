@@ -1,0 +1,534 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #F7F8FA;
+    color: #111827;
+    line-height: 1.5;
+}
+
+.page-wrapper {
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Page Header */
+.page-header {
+    background-color: white;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.page-header .container {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6B7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.back-button:hover {
+    color: #111827;
+}
+
+.back-button i {
+    width: 20px;
+    height: 20px;
+}
+
+.header-content h1 {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #6B7280;
+    font-size: 16px;
+}
+
+/* Main Content */
+.main-content {
+    padding: 32px 0;
+}
+
+.layout-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 1024px) {
+    .layout-grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+/* Card Styles */
+.card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 32px;
+}
+
+/* Candidate Card */
+.candidate-header {
+    display: flex;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.verification-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background-color: #4B2E83;
+    border-radius: 50%;
+    padding: 4px;
+}
+
+.verification-badge i {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.candidate-info {
+    flex: 1;
+}
+
+.info-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.badges {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.badge-student {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #DBEAFE;
+}
+
+.badge-verified {
+    color: #16A34A;
+}
+
+.badge-verified i {
+    width: 16px;
+    height: 16px;
+}
+
+.candidate-details {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-primary {
+    color: #374151;
+    font-size: 16px;
+}
+
+.detail-secondary {
+    color: #6B7280;
+    font-size: 14px;
+}
+
+/* Details Section */
+.details-section {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Bid Card */
+.bid-card {
+    background-color: #F5F3FF;
+    border: 1px solid #E9D5FF;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.bid-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.bid-header i {
+    width: 20px;
+    height: 20px;
+    color: #4B2E83;
+}
+
+.bid-header span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.bid-amount {
+    font-size: 36px;
+    font-weight: 700;
+    color: #4B2E83;
+}
+
+/* Info Box */
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background-color: #F9FAFB;
+    border-radius: 12px;
+}
+
+.info-icon {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.info-icon i {
+    width: 24px;
+    height: 24px;
+    color: #374151;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.info-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Action Buttons */
+.action-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: white;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button:hover {
+    border-color: #4B2E83;
+    background-color: #F5F3FF;
+}
+
+.action-button-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.action-icon {
+    background-color: #E9D5FF;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.action-button:hover .action-icon {
+    background-color: #4B2E83;
+}
+
+.action-icon i {
+    width: 24px;
+    height: 24px;
+    color: #4B2E83;
+    transition: color 0.2s;
+}
+
+.action-button:hover .action-icon i {
+    color: white;
+}
+
+.action-text {
+    text-align: left;
+}
+
+.action-title {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.action-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+.action-arrow {
+    width: 20px;
+    height: 20px;
+    color: #9CA3AF;
+    transition: color 0.2s;
+}
+
+.action-button:hover .action-arrow {
+    color: #4B2E83;
+}
+
+/* Stats Card */
+.stats-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 24px;
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-icon {
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.stat-icon i {
+    width: 20px;
+    height: 20px;
+}
+
+.stat-icon-green {
+    background-color: #DCFCE7;
+}
+
+.stat-icon-green i {
+    color: #16A34A;
+}
+
+.stat-icon-orange {
+    background-color: #FED7AA;
+}
+
+.stat-icon-orange i {
+    color: #EA580C;
+}
+
+.stat-icon-yellow {
+    background-color: #FEF3C7;
+}
+
+.stat-icon-yellow i {
+    color: #EAB308;
+}
+
+.stat-icon-blue {
+    background-color: #DBEAFE;
+}
+
+.stat-icon-blue i {
+    color: #2563EB;
+}
+
+.stat-item > span {
+    color: #374151;
+    font-size: 15px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.rating-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.star-icon {
+    width: 16px;
+    height: 16px;
+    color: #EAB308;
+    fill: #EAB308;
+}
+
+/* Decision Card */
+.decision-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 24px;
+}
+
+.decision-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.decision-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.decision-button i {
+    width: 20px;
+    height: 20px;
+}
+
+.decision-accept {
+    background-color: #16A34A;
+    color: white;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.decision-accept:hover {
+    background-color: #15803D;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.decision-reject {
+    background-color: white;
+    color: #DC2626;
+    border: 2px solid #DC2626;
+}
+
+.decision-reject:hover {
+    background-color: #FEE2E2;
+}
+
+.decision-note {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: center;
+    margin-top: 16px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .candidate-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .candidate-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .info-header {
+        text-align: center;
+    }
+
+    .badges {
+        justify-content: center;
+    }
+
+    .candidate-details {
+        align-items: center;
+    }
+
+    .card {
+        padding: 24px;
+    }
+
+    .bid-amount {
+        font-size: 32px;
+    }
+
+    .action-button {
+        padding: 16px;
+    }
+}
