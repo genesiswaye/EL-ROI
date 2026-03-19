@@ -203,23 +203,26 @@
 
                 <!-- Logo -->
                 <div class="logo">CampusLink</div>
+                <?php
+                    $base = "/EL-ROI"; // or your project root
+                ?>
 
                 <!-- Desktop Navigation -->
                 <div class="nav-links" id="navLinks">
-                    <a href="overview.php"
+                    <a href="<?= $base ?>/jobs/overview.php"
                         class="nav-link <?= ($activePage == 'overview') ? 'nav-link-active' : '' ?>">
                         Overview
                     </a>
 
                     <?php if ($role === 'student'): ?>
-                        <a href="browse_jobs.php"
+                        <a href="<?= $base ?>/jobs/browse_jobs.php"
                             class="nav-link <?= ($activePage == 'browse_jobs') ? 'nav-link-active' : '' ?>">
                             Browse Jobs
                         </a>
                         
                     <?php endif; ?>
 
-                    <a href="post_job.php"
+                    <a href="<?= $base ?>/jobs/post_job.php"
                     class="nav-link <?= ($activePage == 'post_job') ? 'nav-link-active' : '' ?>">
                     Post Job
                     </a>
@@ -231,17 +234,17 @@
                         </a>
                         <div class="dropdown-menu">
 
-                            <a href="my_jobs.php">Open Jobs</a>
+                            <a href="<?= $base ?>/jobs/my_jobs.php">Open Jobs</a>
 
-                            <a href="jobs_in_progress.php">Jobs In Progress</a>
+                            <a href="<?= $base ?>/jobs/jobs_in_progress.php">Jobs In Progress</a>
 
-                            <a href="completed_jobs.php">Completed Jobs</a>
+                            <a href="<?= $base ?>/jobs/completed_jobs.php">Completed Jobs</a>
 
                         </div>
                     </div>
 
-                    <a href="applications.php"
-                        class="nav-link <?= ($activePage == 'applications') ? 'nav-link-active' : '' ?>">
+                    <a href="<?= $base ?>/applications/my_applications.php"
+                        class="nav-link <?= ($activePage == 'my_applications') ? 'nav-link-active' : '' ?>">
                         Applications
                     </a>
 
