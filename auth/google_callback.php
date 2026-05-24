@@ -4,6 +4,8 @@ require_once '../config/database.php';
 
 session_start();
 
+$_SESSION['is_admin'] = $user['is_admin'] ?? 0;
+
 $client = new Google_Client();
 
 $client->setClientId("840221080643-an8np874f00nb74n99ot34fe5fdbskib.apps.googleusercontent.com");
@@ -64,9 +66,27 @@ if (!$user) {
     ]);
 
     $user_id = $pdo->lastInsertId();
-}
-else {
+
+    // CREATE WALLET FOR NEW USER
+    $stmt = $pdo->prepare("
+    INSERT INTO wallets (user_id, balance, held_balance, currency)
+    VALUES (?, 0.00, 0.00, 'NGN')
+");
+    $stmt->execute([$user_id]);
+} else {
     $user_id = $user['id'];
+
+    $stmt = $pdo->prepare("SELECT id FROM wallets WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+
+    if (!$stmt->fetch()) {
+        $stmt = $pdo->prepare("
+        INSERT INTO wallets (user_id, balance, held_balance, currency)
+        VALUES (?, 0.00, 0.00, 'NGN')
+    ");
+        $stmt->execute([$user_id]);
+    }
+
     $role = $user['role'];
 }
 
@@ -75,6 +95,13 @@ $_SESSION['role'] = $role;
 $_SESSION['email'] = $email;
 $_SESSION['name'] = $name;
 
+
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$_SESSION['is_admin'] = $user['is_admin'] ?? 0;
+
 /* ---------- STUDENT ---------- */
 
 if ($role === "student") {
@@ -82,22 +109,19 @@ if ($role === "student") {
     $stmt = $pdo->prepare("SELECT * FROM student_profiles WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $profile = $stmt->fetch();
-    
+
     if (!$profile) {
         header("Location: ../profile/setup_student.php");
         exit();
     } else {
-        header("Location: ../dashboard/student.php");
+        header("Location: ../dashboard/overview.php");
         exit();
     }
-
 }
 
 
 
-/* ---------- LECTURER ---------- */
-
-elseif ($role === "lecturer") {
+/* ---------- LECTURER ---------- */ elseif ($role === "lecturer") {
 
     $stmt = $pdo->prepare("SELECT * FROM lecturer_profiles WHERE user_id = ?");
     $stmt->execute([$user_id]);
@@ -106,10 +130,8 @@ elseif ($role === "lecturer") {
     if (!$profile) {
         header("Location: ../profile/setup_lecturer.php");
     } else {
-        header("Location: ../dashboard/lecturer.php");
+        header("Location: ../dashboard/overview.php");
     }
-
 }
 
 exit();
-?>

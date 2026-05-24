@@ -89,19 +89,19 @@ if ($proposal['created_by'] != $user_id) {
         <!-- Page Header -->
         <header class="page-header">
             <div class="container">
-             <a href="view_applications.php?job_id=<?= $proposal['job_id'] ?>" class="back-button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-                Back to previous page
-            </a>
+                <a href="view_applications.php?job_id=<?= $proposal['job_id'] ?>" class="back-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to previous page
+                </a>
                 <div class="header-content">
                     <h1>Proposal for: <?= htmlspecialchars($proposal['title']) ?></h1>
                     <!-- <p class="subtitle">Project: Mobile App Development</p> -->
                 </div>
             </div>
-            
+
         </header>
 
         <!-- Main Content -->
@@ -318,7 +318,7 @@ if ($proposal['created_by'] != $user_id) {
                                         <input type="hidden" name="proposal_id" value="<?= $proposal['id'] ?>">
                                         <input type="hidden" name="job_id" value="<?= $proposal['job_id'] ?>">
                                         <!-- Accept Button -->
-                                        <button class="decision-button decision-accept">
+                                        <button onclick="acceptJob(this)" class="decision-button decision-accept">
                                             <i data-lucide="check-circle"></i>
                                             Accept Proposal
                                         </button>
@@ -335,11 +335,11 @@ if ($proposal['created_by'] != $user_id) {
                                         </button>
                                     </div>
                                 </form>
-                           
+
                                 <p class="decision-note">
                                     This action will notify the candidate via email
                                 </p>
-                        <?php else: ?>
+                            <?php else: ?>
                                 <p class="text-sm font-medium text-gray-500">
 
                                     This proposal has already been <?= htmlspecialchars($proposal['status']) ?>.
@@ -357,6 +357,18 @@ if ($proposal['created_by'] != $user_id) {
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
+
+      function acceptJob(button) {
+
+    if (button.disabled) {
+        return;
+    }
+
+    button.disabled = true;
+    button.innerText = "Processing...";
+
+    button.form.submit();
+}
     </script>
 </body>
 

@@ -54,53 +54,221 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("You already submitted a proposal for this job.");
     }
 
-$bid_amount = $_POST['bid_amount'];
-$delivery_days = $_POST['estimated_delivery_days'];
+    $bid_amount = $_POST['bid_amount'];
+    $delivery_days = $_POST['estimated_delivery_days'];
 
-$cover_letter_name = null;
-$sample_file = null;
+    $cover_letter_name = null;
+    $sample_file = null;
 
-/* COVER LETTER */
+    /* COVER LETTER */
 
-if (!empty($_FILES['cover_letter']['name'])) {
+    if (!empty($_FILES['cover_letter']['name'])) {
 
-    $coverDir = "../uploads/cover_letters/";
+        $coverDir = "../uploads/cover_letters/";
 
-    if (!is_dir($coverDir)) {
-        mkdir($coverDir, 0777, true);
+        if (!is_dir($coverDir)) {
+            mkdir($coverDir, 0777, true);
+        }
+
+        $cover_letter_name = time() . "_" . basename($_FILES['cover_letter']['name']);
+
+        move_uploaded_file(
+            $_FILES['cover_letter']['tmp_name'],
+            $coverDir . $cover_letter_name
+        );
     }
 
-    $cover_letter_name = time() . "_" . basename($_FILES['cover_letter']['name']);
+    /* SAMPLE WORK */
 
-    move_uploaded_file(
-        $_FILES['cover_letter']['tmp_name'],
-        $coverDir . $cover_letter_name
-    );
-}
+    if (!empty($_FILES['sample_file']['name'])) {
 
-/* SAMPLE WORK */
+        $sampleDir = "../uploads/samples/";
 
-if (!empty($_FILES['sample_file']['name'])) {
+        if (!is_dir($sampleDir)) {
+            mkdir($sampleDir, 0777, true);
+        }
 
-    $sampleDir = "../uploads/samples/";
+        $sample_file = time() . "_" . basename($_FILES['sample_file']['name']);
 
-    if (!is_dir($sampleDir)) {
-        mkdir($sampleDir, 0777, true);
+        move_uploaded_file(
+            $_FILES['sample_file']['tmp_name'],
+            $sampleDir . $sample_file
+        );
     }
 
-    $sample_file = time() . "_" . basename($_FILES['sample_file']['name']);
 
-    move_uploaded_file(
-        $_FILES['sample_file']['tmp_name'],
-        $sampleDir . $sample_file
-    );
-}
+    /* JOB SKILLS */
+
+    $stmt = $pdo->prepare("
+
+SELECT skill_id
+
+FROM job_skills
+
+WHERE job_id=?
+
+");
+
+    $stmt->execute([
+        $job_id
+    ]);
+
+    $job_skills =
+        $stmt->fetchAll(
+            PDO::FETCH_COLUMN
+        );
+
+    $total_skills =
+        max(
+            count(
+                $job_skills
+            ),
+            1
+        );
+
+    /* STUDENT SKILLS */
+
+    $stmt = $pdo->prepare("
+
+SELECT skill_id
+
+FROM student_skills
+
+WHERE user_id=?
+
+");
+
+    $stmt->execute([
+        $student_id
+    ]);
+
+    $student_skills =
+        $stmt->fetchAll(
+            PDO::FETCH_COLUMN
+        );
+
+    $matched_skills =
+        count(
+
+            array_intersect(
+
+                $job_skills,
+
+                $student_skills
+
+            )
+
+        );
+
+    $skill_match =
+        $matched_skills
+        /
+        $total_skills;
+
+    /* STUDENT DATA */
+
+    $stmt = $pdo->prepare("
+
+SELECT
+
+rating,
+
+completed_jobs
+
+FROM users
+
+WHERE id=?
+
+");
+
+    $stmt->execute([
+        $student_id
+    ]);
+
+    $student =
+        $stmt->fetch();
+
+    $rating =
+        $student['rating']
+        ?? 0;
+
+    $completed =
+        $student['completed_jobs']
+        ?? 0;
+
+    /* PYTHON */
+
+    $python =
+        "C:\\xampp\\htdocs\\EL-ROI\\AI\\winvenv\\Scripts\\python.exe";
+
+    $predict =
+        "C:\\xampp\\htdocs\\EL-ROI\\AI\\predict.py";
+
+    $command =
+
+        "\"$python\" \"$predict\" "
+
+        . $skill_match . " "
+
+        . $matched_skills . " "
+
+        . $rating . " "
+
+        . $completed
+
+        . " 2>&1";
+
+    $ml =
+        (float)
+
+        trim(
+
+            shell_exec(
+
+                $command
+
+            )
+
+        );
+
+    /* HYBRID */
+
+    $final =
+
+        ($skill_match * 70)
+
+        +
+
+        (($rating / 5) * 20)
+
+        +
+
+        min(
+            $completed,
+            10
+        )
+
+        +
+
+        ($ml * 0.15);
+
+    $final =
+        round(
+
+            min(
+                100,
+                $final
+            ),
+
+            2
+
+        );
     /* INSERT APPLICATION */
 
     $stmt = $pdo->prepare("
     INSERT INTO applications
-    (job_id, student_id, bid_amount, estimated_delivery_days, cover_letter_file, sample_file, status)
-    VALUES (?, ?, ?, ?, ?, ?, 'pending')
+    (job_id, student_id, bid_amount, estimated_delivery_days, cover_letter_file, sample_file, ai_score, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
     ");
 
     $stmt->execute([
@@ -109,7 +277,8 @@ if (!empty($_FILES['sample_file']['name'])) {
         $bid_amount,
         $delivery_days,
         $cover_letter_name,
-        $sample_file
+        $sample_file,
+        $final
     ]);
 
     header("Location: browse_jobs.php");
@@ -132,7 +301,7 @@ if (!empty($_FILES['sample_file']['name'])) {
 <body class="bg-[#F7F8FA]">
 
     <div class="max-w-2xl mx-auto py-10 px-6">
-    
+
         <h1 class="text-2xl font-semibold mb-6">
             Apply for: <?= htmlspecialchars($job['title']) ?>
         </h1>
@@ -282,13 +451,14 @@ if (!empty($_FILES['sample_file']['name'])) {
             document.getElementById("fileName").textContent = fileName;
 
         }
+
         function updateSampleFileName(input) {
 
             const fileName = input.files[0]?.name || "Attach a sample of your work";
 
             document.getElementById("sampleFileName").textContent = fileName;
 
-            }
+        }
     </script>
 </body>
 

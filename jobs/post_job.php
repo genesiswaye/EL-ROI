@@ -11,11 +11,14 @@ $user_id = $_SESSION['user_id'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $title = $_POST['title'];
-    $description = $_POST['description'];
+    $_SESSION['job_form'] = $_POST;
+
+    $title = trim($_POST['title']);
+    $description = trim($_POST['description']);
     $budget = $_POST['budget'];
     $deadline = $_POST['deadline'];
     $category = $_POST['category'];
+
     $requirements = $_POST['requirements'] ?? null;
     $milestones = $_POST['milestones'] ?? null;
     $location_type = $_POST['location_type'] ?? null;
@@ -43,26 +46,71 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $milestones = implode("\n", $data);
     }
+
+
+    $errors = [];
+
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $budget = trim($_POST['budget'] ?? '');
+    $deadline = trim($_POST['deadline'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+
+    if ($title === '') {
+
+        $errors[] = "Title is required.";
+    }
+
+    if ($description === '') {
+
+        $errors[] = "Description is required.";
+    }
+
+    if ($budget === '') {
+
+        $errors[] = "Budget is required.";
+    }
+
+    if ($deadline === '') {
+
+        $errors[] = "Deadline is required.";
+    }
+
+    if ($category === '') {
+
+        $errors[] = "Category is required.";
+    }
+
+    if (!empty($errors)) {
+
+        $_SESSION['errors'] = $errors;
+
+        $_SESSION['job_form'] = $_POST;
+
+        header("Location: post_job.php");
+
+        exit();
+    }
     /* INSERT JOB */
 
-   $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
     INSERT INTO jobs
     (created_by, title, description, requirements, milestones, location_type, budget, deadline, category, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open')
 ");
 
-$stmt->execute([
-    $user_id,
-    $title,
-    $description,
-    $requirements,
-    $milestones,
-    $location_type,
-    $budget,
-    $deadline,
-    $category
-]);
-    
+    $stmt->execute([
+        $user_id,
+        $title,
+        $description,
+        $requirements,
+        $milestones,
+        $location_type,
+        $budget,
+        $deadline,
+        $category
+    ]);
+
     /* GET JOB ID */
 
 
@@ -112,7 +160,11 @@ $stmt->execute([
         }
     }
 
-    header("Location: ../dashboard/employer.php");
+    header(
+        "Location: successfully_created.php?job_id="
+            . $job_id
+    );
+
     exit();
 }
 /* ---------- FETCH SKILLS FOR TOMSELECT ---------- */
@@ -142,6 +194,23 @@ $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+    <style>
+        .error-box {
+
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 10px;
+
+            border: 1px solid #fca5a5;
+
+        }
+    </style>
 </head>
 
 <body class="bg-[#F7F8FA] min-h-screen font-sans">
@@ -164,6 +233,23 @@ $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- Form Card -->
             <div class="form-card">
                 <form id="postJobForm" method="POST">
+                    <?php
+
+                    if (!empty($_SESSION['errors'])) {
+
+                        foreach ($_SESSION['errors'] as $error) {
+
+                            echo "
+        <div class='error-box'>
+            $error
+        </div>
+        ";
+                        }
+
+                        unset($_SESSION['errors']);
+                    }
+
+                    ?>
                     <!-- Job Title -->
                     <div class="form-group">
                         <label for="jobTitle" class="form-label">
@@ -448,6 +534,55 @@ $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                const form =
+                    document.querySelector("form");
+
+                if (!form) return;
+
+                form.addEventListener(
+                    "submit",
+                    function(event) {
+
+                        if (
+                            window.preventSubmit
+                        ) {
+
+                            event.preventDefault();
+
+                        }
+
+                    }
+                );
+
+                form.querySelectorAll(
+                    "input, select"
+                ).forEach(field => {
+
+                    field.addEventListener(
+                        "keydown",
+                        function(event) {
+
+                            if (
+                                event.key === "Enter"
+                            ) {
+
+                                event.preventDefault();
+
+                                return false;
+
+                            }
+
+                        }
+                    );
+
+                });
+
+            }
+        );
         // Project type selection
         const projectTypeCards = document.querySelectorAll('.project-type-card');
         const projectTypeRadios = document.querySelectorAll('.project-type-radio');
@@ -555,16 +690,18 @@ $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
 
         }
-        document.getElementById("postJobForm").addEventListener("submit", function(){
+        document.getElementById("postJobForm").addEventListener("submit", function() {
 
-    const values = skillSelect.getValue();
+            const values = skillSelect.getValue();
 
-    const data = values.map(v => ({ value: v }));
+            const data = values.map(v => ({
+                value: v
+            }));
 
-    document.getElementById("skillsData").value =
-    JSON.stringify(data);
+            document.getElementById("skillsData").value =
+                JSON.stringify(data);
 
-});
+        });
     </script>
 </body>
 

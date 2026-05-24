@@ -22,12 +22,18 @@ SELECT
     jobs.title,
     jobs.budget,
 
-    users.full_name AS employer_name
+    users.full_name AS employer_name,
+
+    escrows.status AS escrow_status
 
 FROM applications
 
 JOIN jobs ON applications.job_id = jobs.id
 JOIN users ON jobs.created_by = users.id
+
+LEFT JOIN escrows 
+    ON escrows.job_id = jobs.id 
+    AND escrows.freelancer_id = applications.student_id
 
 WHERE applications.student_id = ?
 
@@ -87,12 +93,28 @@ $applications = $stmt->fetchAll();
                                 </p>
                             </div>
 
-                            <span class="text-sm font-medium
-                            <?=
-                            $app['status'] === 'accepted' ? 'text-green-600' : ($app['status'] === 'rejected' ? 'text-red-500' : ($app['status'] === 'in_progress' ? 'text-blue-600' : ($app['status'] === 'completed' ? 'text-gray-600' :
-                                'text-yellow-600')))
-                            ?>">
-                                <?= ucfirst(str_replace('_', ' ', $app['status'])) ?>
+                            <?php
+                            $status = $app['status'];
+
+                            if ($status === 'completed' && $app['escrow_status'] === 'released') {
+                                $display = "Paid";
+                                $color = "text-green-600";
+                            } elseif ($status === 'completed') {
+                                $display = "Completed (Pending Payment)";
+                                $color = "text-yellow-600";
+                            } else {
+                                $display = ucfirst(str_replace('_', ' ', $status));
+                                $color = match ($status) {
+                                    'accepted' => 'text-green-600',
+                                    'rejected' => 'text-red-500',
+                                    'in_progress' => 'text-blue-600',
+                                    default => 'text-yellow-600'
+                                };
+                            }
+                            ?>
+
+                            <span class="text-sm font-medium <?= $color ?>">
+                                <?= $display ?>
                             </span>
 
                         </div>
@@ -121,8 +143,8 @@ $applications = $stmt->fetchAll();
                                 <?php endif; ?>
 
                                 <!-- CONTINUE WORK change to message later -->
-                                <?php if ($app['status'] === 'accepted'): ?>
-                                    <a href="submit_work.php?job_id=<?= $app['job_id'] ?>"
+                                <?php if ($app['status'] === 'accepted' || $app['status'] === 'in_progress'): ?>
+                                    <a href="../messages/messages.php?= $app['job_id'] ?>"
                                         class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
                                         Continue Work
                                     </a>
@@ -171,22 +193,22 @@ $applications = $stmt->fetchAll();
 
     </div>
     <script>
-            function openModal(appId) {
+        function openModal(appId) {
 
-                const modal = document.getElementById("confirmModal");
-                const btn = document.getElementById("confirmDeleteBtn");
+            const modal = document.getElementById("confirmModal");
+            const btn = document.getElementById("confirmDeleteBtn");
 
-                btn.href = "withdraw_application.php?id=" + appId;
+            btn.href = "withdraw_application.php?id=" + appId;
 
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            }
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
 
-            function closeModal() {
-                const modal = document.getElementById("confirmModal");
-                modal.classList.remove("flex");
-                modal.classList.add("hidden");
-            }
+        function closeModal() {
+            const modal = document.getElementById("confirmModal");
+            modal.classList.remove("flex");
+            modal.classList.add("hidden");
+        }
     </script>
 
 </body>

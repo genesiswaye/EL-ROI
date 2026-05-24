@@ -48,6 +48,31 @@ $jobs = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Jobs In Progress</title>
     <link rel="stylesheet" href="../dist/output.css">
+    <style>
+        @media (max-width: 768px) {
+
+            .job-card {
+                display: grid;
+                grid-template-rows: 1fr auto;
+                height: 100%;
+            }
+
+            .job-card-actions {
+                display: grid;
+               grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .job-card-actions a {
+                display: block;
+                text-align: center;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+            }
+
+        }
+    </style>
 </head>
 
 <body class="bg-[#F7F8FA] min-h-screen">
@@ -70,7 +95,7 @@ $jobs = $stmt->fetchAll();
 
                 <?php foreach ($jobs as $job): ?>
 
-                    <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="job-card-content bg-white p-6 rounded-lg shadow">
 
                         <!-- HEADER -->
                         <div class="flex justify-between items-start">
@@ -106,7 +131,7 @@ $jobs = $stmt->fetchAll();
                         </div>
 
                         <!-- ACTIONS -->
-                        <div class="mt-5 flex gap-3">
+                        <div class="job-card-actions mt-5 flex gap-3">
 
                             <!-- VIEW JOB -->
                             <a href="../jobs/view_job.php?job_id=<?= $job['job_id'] ?>"
@@ -137,13 +162,12 @@ $jobs = $stmt->fetchAll();
 
         <?php endif; ?>
         <?php if ($job['status'] === 'accepted'): ?>
-    <p class="text-xs text-gray-500 mt-2">
-        Start by discussing details with the employer before submitting work.
-    </p>
-<?php endif; ?>
+            <p class="text-xs text-gray-500 mt-2">
+                Start by discussing details with the employer before submitting work.
+            </p>
+        <?php endif; ?>
 
     </div>
-    
 
 </body>
 

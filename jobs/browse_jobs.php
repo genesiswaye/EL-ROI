@@ -1,9 +1,29 @@
 <?php
 session_start();
+
 require_once "../config/database.php";
 require_once "../includes/auth_guard.php";
 
+if (!isset($_SESSION['user_id'])) {
+
+    header("Location: ../auth/login.php");
+    exit();
+}
+
+/* ROLE PROTECTION */
+
+if ($_SESSION['role'] !== 'student') {
+
+    header("Location: ../errors/error.php?message=" .
+        urlencode("Unauthorized access"));
+
+    exit();
+}
+
+
 $user_id = $_SESSION['user_id'];
+
+
 
 /* GET FILTER VALUES */
 
@@ -13,6 +33,7 @@ $role = $_GET['role'] ?? 'all';
 $skill = $_GET['skill'] ?? 'all';
 
 $params = [];
+$params['user_id'] = $user_id;
 
 /* BASE QUERY */
 $limit = 10;
@@ -28,9 +49,24 @@ jobs.deadline,
 jobs.category,
 jobs.created_at,
 users.full_name,
-users.role
+users.role,
+
+COALESCE(
+job_recommendations.ai_score,
+0
+)
+
+AS ai_score
+
+
 FROM jobs
 JOIN users ON jobs.created_by = users.id
+
+LEFT JOIN
+job_recommendations
+
+ON jobs.id = job_recommendations.job_id AND
+job_recommendations.student_id= :user_id
 LEFT JOIN job_skills ON jobs.id = job_skills.job_id
 WHERE jobs.status = 'open'
 ";
@@ -80,7 +116,7 @@ if ($price !== 'all') {
 //     $params['skill'] = $skill;
 // }
 
-$sql .= " ORDER BY jobs.created_at DESC LIMIT :limit OFFSET :offset";
+$sql .= " ORDER BY ai_score DESC LIMIT :limit OFFSET :offset";
 
 /* EXECUTE QUERY */
 
@@ -95,6 +131,8 @@ $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
 
 $stmt->execute();
 $jobs = $stmt->fetchAll();
+
+
 
 /* FETCH SKILLS FOR FILTER DROPDOWN */
 
@@ -300,7 +338,16 @@ $categories = $stmt->fetchAll();
                         <?= htmlspecialchars($job['title']) ?>
 
                     </h3>
+                    <p class="text-sm
+                        font-semibold
+                        text-[#4B2E83]
+                        mt-2">
 
+                        AI Match:
+
+                        <?= $job['ai_score'] ?>%
+
+                    </p>
                     <span class="status-badge status-open">
                         Open
                     </span>
@@ -403,12 +450,12 @@ $categories = $stmt->fetchAll();
 
         <?php endforeach; ?>
 
-        </div>
-        <div class="pagination">
-            <button id="loadMoreBtn" class="btn-load-more">
-                Load More Projects
-            </button>
-        </div>
+    </div>
+    <div class="pagination">
+        <button id="loadMoreBtn" class="btn-load-more">
+            Load More Projects
+        </button>
+    </div>
     </div>
     <div>
         something

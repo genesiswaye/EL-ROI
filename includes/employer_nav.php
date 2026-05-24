@@ -1,23 +1,39 @@
 <?php
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once "../config/database.php";
+
+$unreadCount = 0;
+
+if (isset($_SESSION['user_id'])) {
+
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM notifications
+        WHERE user_id = ?
+        AND is_read = 0
+    ");
+
+    $stmt->execute([$_SESSION['user_id']]);
+
+    $unreadCount = (int)$stmt->fetchColumn();
+}
+
+$role = null;
+
+if (isset($_SESSION['user_id'])) {
+
+    $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+        $role = $user['role'];
     }
-
-    require_once "../config/database.php";
-
-    $role = null;
-
-    if (isset($_SESSION['user_id'])) {
-
-        $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            $role = $user['role'];
-        }
-    }
+}
 ?>
 <style>
     .top-nav {
@@ -130,7 +146,7 @@
 
     .dropdown {
         position: relative;
-       
+
     }
 
     .dropdown-menu {
@@ -164,25 +180,87 @@
     .dropdown:hover .dropdown-menu {
         display: flex;
     }
-    @media (max-width:1024px){
-    .dropdown{
-        width: 100%;
-    }
 
-    .dropdown-menu{
-        position: static;
-        width:100%;
-        border: none;
-        box-shadow: none;
-    }
+    .notification-btn {
+    position: relative;
 
-    .dropdown:hover .dropdown-menu{
-        display: none;
-    }
+    width: 46px;
+    height: 46px;
 
-    .dropdown.active .dropdown-menu{
-        display: flex;
-    }
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #334155;
+
+    transition: all 0.2s ease;
+}
+
+.notification-btn:hover {
+    background: #eef2ff;
+
+    color: #2563eb;
+
+    transform: translateY(-2px);
+}
+
+.notification-badge {
+    position: absolute;
+
+    top: -6px;
+    right: -6px;
+
+    min-width: 22px;
+    height: 22px;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: linear-gradient(
+        135deg,
+        #ef4444,
+        #dc2626
+    );
+
+    color: white;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 3px solid white;
+
+    box-shadow:
+        0 4px 12px rgba(239,68,68,0.35);
+}
+
+    @media (max-width:1024px) {
+        .dropdown {
+            width: 100%;
+        }
+
+        .dropdown-menu {
+            position: static;
+            width: 100%;
+            border: none;
+            box-shadow: none;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: none;
+        }
+
+        .dropdown.active .dropdown-menu {
+            display: flex;
+        }
 
     }
 </style>
@@ -204,12 +282,13 @@
                 <!-- Logo -->
                 <div class="logo">CampusLink</div>
                 <?php
-                    $base = "/EL-ROI"; // or your project root
+                $base = "/EL-ROI"; // or your project root
                 ?>
 
                 <!-- Desktop Navigation -->
+
                 <div class="nav-links" id="navLinks">
-                    <a href="<?= $base ?>/jobs/overview.php"
+                    <a href="<?= $base ?>/dashboard/overview.php"
                         class="nav-link <?= ($activePage == 'overview') ? 'nav-link-active' : '' ?>">
                         Overview
                     </a>
@@ -219,12 +298,12 @@
                             class="nav-link <?= ($activePage == 'browse_jobs') ? 'nav-link-active' : '' ?>">
                             Browse Jobs
                         </a>
-                        
+
                     <?php endif; ?>
 
                     <a href="<?= $base ?>/jobs/post_job.php"
-                    class="nav-link <?= ($activePage == 'post_job') ? 'nav-link-active' : '' ?>">
-                    Post Job
+                        class="nav-link <?= ($activePage == 'post_job') ? 'nav-link-active' : '' ?>">
+                        Post Job
                     </a>
 
                     <div class="dropdown">
@@ -242,20 +321,53 @@
 
                         </div>
                     </div>
+                    <?php if ($role === 'student'): ?>
+                        <a href="<?= $base ?>/applications/my_applications.php"
+                            class="nav-link <?= ($activePage == 'my_applications') ? 'nav-link-active' : '' ?>">
+                            Applications
+                        </a>
+                    <?php endif; ?>
 
-                    <a href="<?= $base ?>/applications/my_applications.php"
-                        class="nav-link <?= ($activePage == 'my_applications') ? 'nav-link-active' : '' ?>">
-                        Applications
-                    </a>
-
-                    <a href="messages.php"
+                    <a href="<?= $base ?>/messages/messages.php"
                         class="nav-link <?= ($activePage == 'messages') ? 'nav-link-active' : '' ?>">
                         Messages
                     </a>
 
-                    <a href="wallet.php"
+                    <a href="../wallet/dashboard.php"
                         class="nav-link <?= ($activePage == 'wallet') ? 'nav-link-active' : '' ?>">
                         Wallet
+                    </a>
+                    <a
+                        href="../notifications/index.php"
+                        class="nav-link <?= ($activePage == 'notifications') ? 'nav-link-active' : '' ?>">
+
+                        <div class="notification-btn">
+
+                            <svg width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2">
+
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+                            </svg>
+
+                            <?php if ($unreadCount > 0): ?>
+
+                                <span class="notification-badge">
+
+                                    <?= $unreadCount > 99 ? '99+' : $unreadCount ?>
+
+                                </span>
+
+                            <?php endif; ?>
+
+                        </div>
+
                     </a>
                 </div>
 
@@ -282,9 +394,9 @@
         });
         document.querySelectorAll(".dropdown > a").forEach(link => {
 
-            link.addEventListener("click", function(e){
+            link.addEventListener("click", function(e) {
 
-                if(window.innerWidth <= 1024){
+                if (window.innerWidth <= 1024) {
                     e.preventDefault();
                     this.parentElement.classList.toggle("active");
                 }

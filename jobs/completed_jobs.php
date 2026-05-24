@@ -22,15 +22,18 @@ try {
             jobs.deadline,
             jobs.category,
             users.full_name AS student_name,
-            applications.student_id
+            applications.student_id,
+            work_submissions.id AS submission_id
         FROM jobs
         JOIN applications
             ON jobs.id = applications.job_id
         JOIN users
             ON applications.student_id = users.id
+        LEFT JOIN work_submissions
+        ON applications.id = work_submissions.application_id
         WHERE jobs.created_by = ?
         AND jobs.status = 'completed'
-        AND applications.status = 'accepted'
+        AND applications.status = 'completed'
         ORDER BY jobs.deadline DESC
     ");
 
@@ -107,16 +110,20 @@ try {
 
                         <div class="flex flex-wrap gap-3 mt-4">
 
-                            <a href="../jobs/view_job.php?id=<?= (int)$job['id'] ?>"
+                            <a href="../jobs/view_job.php?job_id=<?= (int)$job['id'] ?>"
                                 class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                                 View Job
                             </a>
 
-                            <a href="../submissions/view_submission.php?job_id=<?= (int)$job['id'] ?>"
-                                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
-                                View Submission
-                            </a>
+                            <?php if ($job['submission_id']): ?>
 
+                                <a
+                                    href="../applications/view_submissions.php?submission_id=<?= (int)$job['submission_id'] ?>&return=<?= urlencode('/EL-ROI/messages/messages.php') ?>"
+                                    class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                                    View Submission
+                                </a>
+
+                            <?php endif; ?>
                         </div>
 
                     </div>
