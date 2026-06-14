@@ -23,6 +23,39 @@ if ($_SESSION['role'] !== 'student') {
 
 $user_id = $_SESSION['user_id'];
 
+$stmt = $pdo->prepare("
+SELECT
+rating,
+completed_jobs
+FROM users
+WHERE id = ?
+");
+
+$stmt->execute([$user_id]);
+
+$student =
+    $stmt->fetch(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("
+SELECT skill_id
+FROM student_skills
+WHERE user_id = ?
+");
+
+$stmt->execute([$user_id]);
+
+$student_skills =
+    array_map(
+        'intval',
+        $stmt->fetchAll(PDO::FETCH_COLUMN)
+    );
+
+$python =
+    "C:\\xampp\\htdocs\\EL-ROI\\AI\\winvenv\\Scripts\\python.exe";
+
+$predict =
+    "C:\\xampp\\htdocs\\EL-ROI\\AI\\predict.py";
+
 
 
 /* GET FILTER VALUES */
@@ -69,6 +102,7 @@ ON jobs.id = job_recommendations.job_id AND
 job_recommendations.student_id= :user_id
 LEFT JOIN job_skills ON jobs.id = job_skills.job_id
 WHERE jobs.status = 'open'
+AND is_deleted = 0
 ";
 
 /* SEARCH FILTER */
@@ -329,6 +363,86 @@ $categories = $stmt->fetchAll();
     <div class="projects-grid">
 
         <?php foreach ($jobs as $job): ?>
+            <?php
+            $stmt = $pdo->prepare("
+            SELECT skill_id
+            FROM job_skills
+            WHERE job_id = ?
+            ");
+
+            $stmt->execute([
+            $job['id']
+            ]);
+
+            $job_skills =
+            array_map(
+            'intval',
+            $stmt->fetchAll(PDO::FETCH_COLUMN)
+            );
+
+            $matched_skills =
+            count(
+            array_intersect(
+            $student_skills,
+            $job_skills
+            )
+            );
+
+            $total_required =
+            max(
+            count($job_skills),
+            1
+            );
+
+            $skill_match =
+            $matched_skills /
+            $total_required;
+
+            $command =
+
+            "\"$python\" \"$predict\" "
+
+            . $skill_match . " "
+
+            . $matched_skills . " "
+
+            . ($student['rating'] ?? 0) . " "
+
+            . ($student['completed_jobs'] ?? 0)
+
+            . " 2>&1";
+
+            $ml =
+            (float)
+            trim(
+            shell_exec($command)
+            );
+
+            $final_score =
+
+            ($skill_match * 70)
+
+            +
+
+            ((($student['rating'] ?? 0) / 5) * 20)
+
+            +
+
+            min(
+            ($student['completed_jobs'] ?? 0),
+            10
+            )
+
+            +
+
+            ($ml * 0.15);
+
+            $final_score =
+            round(
+            min(100, $final_score),
+            2
+            );
+            ?>
             <!-- Project Card 1 -->
             <div class="project-card">
 
@@ -339,13 +453,13 @@ $categories = $stmt->fetchAll();
 
                     </h3>
                     <p class="text-sm
-                        font-semibold
-                        text-[#4B2E83]
-                        mt-2">
+                            font-semibold
+                            text-[#4B2E83]
+                            mt-2">
 
                         AI Match:
 
-                        <?= $job['ai_score'] ?>%
+                        <?= number_format($final_score, 2) ?>%
 
                     </p>
                     <span class="status-badge status-open">
@@ -353,11 +467,11 @@ $categories = $stmt->fetchAll();
                     </span>
                 </div>
 
-                <p class="project-description">
+                <!-- <p class="project-description">
 
                     <?= htmlspecialchars($job['description']) ?>
 
-                </p>
+                </p> -->
 
                 <div class="posted-by">
 
@@ -381,24 +495,27 @@ $categories = $stmt->fetchAll();
                     FROM job_skills
                     JOIN skills ON job_skills.skill_id = skills.id
                     WHERE job_skills.job_id = ?
+                    LIMIT 4
                     ");
 
                 $stmt->execute([$job['id']]);
 
                 $skills = $stmt->fetchAll();
                 ?>
-                <div class="skills-tags">
+                <div class="skills-container">
+                    <div class="skills-tags">
 
-                    <?php foreach ($skills as $skill): ?>
+                        <?php foreach ($skills as $skill): ?>
 
-                        <span class="skill-tag">
+                            <span class="skill-tag">
 
-                            <?= htmlspecialchars($skill['name']) ?>
+                                <?= htmlspecialchars($skill['name']) ?>
 
-                        </span>
+                            </span>
 
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
 
+                    </div>
                 </div>
                 <div class="project-meta">
 

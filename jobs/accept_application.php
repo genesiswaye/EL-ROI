@@ -44,13 +44,22 @@ try {
     /* 1. Validate + Fetch */
 
     $stmt = $pdo->prepare("
-    SELECT bid_amount, student_id, status
+     SELECT
+        applications.bid_amount,
+        applications.student_id,
+        applications.status,
+        jobs.title
     FROM applications
-    WHERE id = ? AND job_id = ? FOR UPDATE
+    JOIN jobs ON applications.job_id = jobs.id
+    WHERE applications.id = ?
+    AND applications.job_id = ?
+    FOR UPDATE
 ");
     $stmt->execute([$proposal_id, $job_id]);
 
     $application = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $jobTitle = $application['title'];
 
     if (!$application) {
     throw new Exception("Application not found");
@@ -92,6 +101,16 @@ try {
     ");
     $stmt->execute([$proposal_id]);
 
+        $stmt = $pdo->prepare("
+        SELECT id, student_id
+        FROM applications
+        WHERE job_id = ?
+        AND id != ?
+    ");
+    $stmt->execute([$job_id, $proposal_id]);
+
+    $rejectedApplicants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
     /* 5. Reject others */
 
@@ -102,6 +121,19 @@ try {
         AND id != ?
     ");
     $stmt->execute([$job_id, $proposal_id]);
+
+    foreach ($rejectedApplicants as $rejected) {
+
+    createNotification(
+        $pdo,
+        $rejected['student_id'],
+        'application_rejected',
+        'Application Update',
+        'Unfortunately, your application "' . $jobTitle . '" was not selected.' ,
+        '../jobs/view_job.php?application_id=' . $proposal_id
+
+    );
+}
 
 
     /* 6. CREATE ESCROW RECORD */
@@ -136,7 +168,7 @@ try {
     $freelancer_id,
     'proposal_accepted',
     'Proposal Accepted',
-    'Your proposal has been accepted and work can now begin.',
+    'Your proposal for "' . $jobTitle . '" has been accepted and work can now begin.',
     '../messages/messages.php?application_id=' . $proposal_id
 );
 
@@ -184,7 +216,7 @@ try {
         "Location: ../errors/error.php?message=" .
             urlencode($e->getMessage()) .
             "&return=" .
-            urlencode("browse_jobs.php?job_id=" . $job_id)
+            urlencode("dashboard/overview.php?job_id=" . $job_id)
     );
     exit();
 }

@@ -371,6 +371,15 @@ $quickAmounts = [5000, 10000, 25000, 50000, 100000];
     <link href="../dist/output.css" rel="stylesheet">
     <title>CampusLink - Wallet Dashboard</title>
     <style>
+        @media (max-width: 768px) {
+   
+    .bannerdiv{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* width: 100%; */
+    }
+}
 
     </style>
 </head>
@@ -382,7 +391,7 @@ $quickAmounts = [5000, 10000, 25000, 50000, 100000];
     ?>
 
     <!-- Header -->
-    <header class="header">
+    <!-- <header class="header" style="margin-bottom: 2rem; display:none;">
         <div class="header-right">
             <div class="header-actions">
                 <div class="notification-btn">
@@ -397,28 +406,32 @@ $quickAmounts = [5000, 10000, 25000, 50000, 100000];
             </div>
         </div>
 
-    </header>
+    </header> -->
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" style="margin-top: 2rem;">
         <!-- Welcome Banner -->
-        <div class="welcome-banner">
-            <h2>
-                Welcome back, <?= htmlspecialchars($_SESSION['name']) ?>
-            </h2>
+         <div class="bannerdiv">
+            <div class="welcome-banner">
+                <h2>
+                    Welcome back, <?= htmlspecialchars($_SESSION['name']) ?>
+                </h2>
 
-            <p>
-                Manage your deposits, earnings, withdrawals and escrow payments securely.
-            </p>
-            <p>
+                <p>
+                    Manage your deposits, earnings, withdrawals and escrow payments securely.
+                </p>
+                <p>
 
-                You have
-                <?= $activeGigs ?> active gigs
-                and
-                <?= $pendingApplications ?> pending applications
+                    You have
+                    <?= $activeGigs ?> active gigs
+                    and
+                    <?= $pendingApplications ?> pending applications
 
-            </p>
-        </div>
+                </p>
+            </div>
+         </div>
+            
+        
 
         <!-- Page Header -->
         <div class="page-header">

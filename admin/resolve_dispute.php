@@ -18,7 +18,7 @@ if (
 ) {
 
     header(
-        "Location: disputes.php"
+        "Location: dispute.php"
     );
 
     exit();
@@ -431,7 +431,7 @@ THIS WAS THE MISSING PIECE
     $pdo->commit();
 
     header(
-        "Location: disputes.php"
+        "Location: dispute.php"
     );
 
     exit();

@@ -120,7 +120,7 @@ try {
         );
     }
 
-    header("Location: withdrawals.php?success=1");
+    header("Location: withdrawal.php?success=1");
     exit();
 } catch (Exception $e) {
 

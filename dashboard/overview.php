@@ -189,17 +189,6 @@ $activeEmployerJobs = $stmt->fetchColumn();
 
 $stmt = $pdo->prepare("
     SELECT COUNT(*)
-    FROM jobs
-    WHERE created_by = ?
-    AND status = 'in_progress'
-");
-
-$stmt->execute([$user_id]);
-
-$activeEmployerJobs = $stmt->fetchColumn();
-
-$stmt = $pdo->prepare("
-    SELECT COUNT(*)
     FROM applications
     JOIN jobs ON applications.job_id = jobs.id
     WHERE jobs.created_by = ?
@@ -276,50 +265,50 @@ $totalSpent = $stmt->fetchColumn();
 
             <!-- Stat Cards -->
             <section class="stats-grid">
-              <?php if ($role === 'student'): ?>
-                <!-- ACTIVE GIGS -->
-                <div class="stat-card">
+                <?php if ($role === 'student'): ?>
+                    <!-- ACTIVE GIGS -->
+                    <div class="stat-card">
 
-                    <div class="stat-header">
+                        <div class="stat-header">
 
-                        <span class="stat-label">
-                            Active Gigs
-                        </span>
+                            <span class="stat-label">
+                                Active Gigs
+                            </span>
 
-                        <div class="stat-icon stat-icon-purple">
+                            <div class="stat-icon stat-icon-purple">
 
-                            <svg width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2">
+                                <svg width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2">
 
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
 
-                                <circle cx="9" cy="7" r="4"></circle>
+                                    <circle cx="9" cy="7" r="4"></circle>
 
-                            </svg>
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+
+                            <?= $activeGigs ?>
+
+                        </div>
+
+                        <div class="stat-footer">
+
+                            <span class="stat-change positive">
+                                Currently active
+                            </span>
 
                         </div>
 
                     </div>
-
-                    <div class="stat-value">
-
-                        <?= $activeGigs ?>
-
-                    </div>
-
-                    <div class="stat-footer">
-
-                        <span class="stat-change positive">
-                            Currently active
-                        </span>
-
-                    </div>
-
-                </div>
                 <?php endif; ?>
                 <!-- COMPLETED JOBS -->
                 <div class="stat-card">
@@ -357,43 +346,43 @@ $totalSpent = $stmt->fetchColumn();
 
                 </div>
                 <?php if ($role === 'student'): ?>
-                <!-- COMPLETED JOBS -->
-                <div class="stat-card">
+                    <!-- COMPLETED JOBS -->
+                    <div class="stat-card">
 
-                    <div class="stat-header">
+                        <div class="stat-header">
 
-                        <span class="stat-label">
-                            Completed Jobs
-                        </span>
+                            <span class="stat-label">
+                                Completed Jobs
+                            </span>
 
-                        <div class="stat-icon stat-icon-green">
+                            <div class="stat-icon stat-icon-green">
 
-                            <svg width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2">
+                                <svg width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2">
 
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
 
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
 
-                            </svg>
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                        <div class="stat-value">
+
+                            <?= $completedJobs ?>
 
                         </div>
 
                     </div>
+                <?php endif; ?>
 
-                    <div class="stat-value">
-
-                        <?= $completedJobs ?>
-
-                    </div>
-
-                </div>
-             <?php endif; ?>
-              
                 <!-- PENDING APPLICATIONS -->
                 <div class="stat-card">
 
@@ -561,52 +550,141 @@ $totalSpent = $stmt->fetchColumn();
                         </div>
 
                     </div>
-                    <?php endif; ?>
+                <?php endif; ?>
             </section>
-        
 
-        <!-- Two Column Layout -->
-        <div class="content-columns">
 
-            <!-- RECOMMENDED GIGS -->
-            <section class="gigs-section">
+            <!-- Two Column Layout -->
+            <div class="content-columns">
+                <?php if ($role === 'student'): ?>
+                    <!-- RECOMMENDED GIGS -->
+                    <section class="gigs-section">
 
-                <div class="section-header">
+                        <div class="section-header">
 
-                    <h2 class="section-title">
-                        Recommended Gigs
-                    </h2>
+                            <h2 class="section-title">
+                                Recommended Gigs
+                            </h2>
 
-                    <a href="../jobs/browse_jobs.php"
-                        class="view-all-link">
+                            <a href="../jobs/browse_jobs.php"
+                                class="view-all-link">
 
-                        View all
+                                View all
 
-                    </a>
+                            </a>
 
-                </div>
+                        </div>
 
-                <div class="gigs-list">
+                        <div class="gigs-list">
 
-                    <?php foreach ($recommendedJobs as $job): ?>
+                            <?php foreach ($recommendedJobs as $job): ?>
 
-                        <div class="gig-card">
+                                <div class="gig-card">
 
-                            <h3 class="gig-title">
+                                    <h3 class="gig-title">
 
-                                <?= htmlspecialchars($job['title']) ?>
+                                        <?= htmlspecialchars($job['title']) ?>
 
-                            </h3>
+                                    </h3>
 
-                            <p class="gig-company">
+                                    <!-- <p class="gig-company">
 
-                                CampusLink Project
+                                        CampusLink Project
 
-                            </p>
+                                    </p> -->
 
-                            <div class="gig-details">
+                                    <div class="gig-details">
 
-                                <div class="gig-detail-item">
+                                        <div class="gig-detail-item">
+
+                                            <svg width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2">
+
+                                                <line x1="12" y1="1" x2="12" y2="23"></line>
+
+                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+
+                                            </svg>
+
+                                            <span>
+
+                                                ₦<?= number_format($job['budget']) ?>
+
+                                            </span>
+
+                                        </div>
+
+                                        <div class="gig-detail-item">
+
+                                            <svg width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2">
+
+                                                <rect width="18"
+                                                    height="18"
+                                                    x="3"
+                                                    y="4"
+                                                    rx="2"></rect>
+
+                                                <line x1="16"
+                                                    y1="2"
+                                                    x2="16"
+                                                    y2="6"></line>
+
+                                            </svg>
+
+                                            <span>
+
+                                                Due:
+                                                <?= date("M d, Y", strtotime($job['deadline'])) ?>
+
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                    <a href="../jobs/view_job.php?job_id=<?= $job['id'] ?>" style="text-decoration: none;"
+                                        class="btn-apply">
+
+                                        Apply Now
+
+                                    </a>
+
+                                </div>
+
+                            <?php endforeach; ?>
+
+                        </div>
+
+                    </section>
+                <?php endif; ?>
+
+                <!-- RECENT ACTIVITY -->
+                <section class="activity-section">
+
+                    <div class="section-header">
+
+                        <h2 class="section-title">
+                            Recent Activity
+                        </h2>
+
+                    </div>
+
+                    <div class="activity-list">
+
+                        <?php foreach ($activities as $activity): ?>
+
+                            <div class="activity-item">
+
+                                <div class="activity-icon activity-icon-payment">
 
                                     <svg width="16"
                                         height="16"
@@ -621,130 +699,42 @@ $totalSpent = $stmt->fetchColumn();
 
                                     </svg>
 
-                                    <span>
-
-                                        ₦<?= number_format($job['budget']) ?>
-
-                                    </span>
-
                                 </div>
 
-                                <div class="gig-detail-item">
+                                <div class="activity-content">
 
-                                    <svg width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2">
+                                    <p class="activity-text">
 
-                                        <rect width="18"
-                                            height="18"
-                                            x="3"
-                                            y="4"
-                                            rx="2"></rect>
+                                        <?= ucfirst(str_replace('_', ' ', $activity['type'])) ?>
 
-                                        <line x1="16"
-                                            y1="2"
-                                            x2="16"
-                                            y2="6"></line>
+                                    </p>
 
-                                    </svg>
+                                    <p class="activity-description">
 
-                                    <span>
+                                        <?= htmlspecialchars($activity['description']) ?>
 
-                                        Due:
-                                        <?= date("M d, Y", strtotime($job['deadline'])) ?>
+                                    </p>
 
-                                    </span>
+                                    <p class="activity-time">
+
+                                        <?= date(
+                                            "M d, Y h:i A",
+                                            strtotime($activity['created_at'])
+                                        ) ?>
+
+                                    </p>
 
                                 </div>
 
                             </div>
 
-                            <a href="../jobs/view_job.php?job_id=<?= $job['id'] ?>" style="text-decoration: none;"
-                                class="btn-apply">
+                        <?php endforeach; ?>
 
-                                Apply Now
+                    </div>
 
-                            </a>
+                </section>
 
-                        </div>
-
-                    <?php endforeach; ?>
-
-                </div>
-
-            </section>
-
-            <!-- RECENT ACTIVITY -->
-            <section class="activity-section">
-
-                <div class="section-header">
-
-                    <h2 class="section-title">
-                        Recent Activity
-                    </h2>
-
-                </div>
-
-                <div class="activity-list">
-
-                    <?php foreach ($activities as $activity): ?>
-
-                        <div class="activity-item">
-
-                            <div class="activity-icon activity-icon-payment">
-
-                                <svg width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2">
-
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-
-                                </svg>
-
-                            </div>
-
-                            <div class="activity-content">
-
-                                <p class="activity-text">
-
-                                    <?= ucfirst(str_replace('_', ' ', $activity['type'])) ?>
-
-                                </p>
-
-                                <p class="activity-description">
-
-                                    <?= htmlspecialchars($activity['description']) ?>
-
-                                </p>
-
-                                <p class="activity-time">
-
-                                    <?= date(
-                                        "M d, Y h:i A",
-                                        strtotime($activity['created_at'])
-                                    ) ?>
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    <?php endforeach; ?>
-
-                </div>
-
-            </section>
-
-        </div>
+            </div>
         </main>
     </div>
 </body>

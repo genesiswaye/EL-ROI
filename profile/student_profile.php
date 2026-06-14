@@ -20,6 +20,7 @@ $stmt = $pdo->prepare("
     student_profiles.level,
     student_profiles.bio,
     users.full_name,
+    users.rating AS rating,
     users.role
     FROM student_profiles
     JOIN users ON student_profiles.user_id = users.id
@@ -50,6 +51,104 @@ WHERE student_skills.user_id = ?
 $stmt->execute([$user_id]);
 
 $skills = $stmt->fetchAll();
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM applications
+    WHERE student_id = ?
+    AND status = 'completed'
+");
+
+$stmt->execute([$user_id]);
+
+$completedJobs = $stmt->fetchColumn();
+$stmt = $pdo->prepare("
+SELECT
+    reviews.*,
+    users.full_name AS reviewer_name,
+    users.role AS reviewer_role,
+    users.rating AS ratingmain,
+    jobs.title AS job_title
+FROM reviews
+JOIN users
+    ON reviews.reviewer_id = users.id
+LEFT JOIN jobs
+    ON reviews.job_id = jobs.id
+WHERE reviews.reviewee_id = ?
+ORDER BY reviews.created_at DESC
+");
+
+$stmt->execute([$user_id]);
+
+$reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM reviews
+    WHERE reviewee_id = ?
+    
+");
+
+$stmt->execute([$user_id]);
+
+$reviews_count = $stmt->fetchColumn();
+/* =========================
+   ACTIVE GIGS
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM applications
+    WHERE student_id = ?
+    AND status IN ('accepted', 'in_progress')
+");
+
+$stmt->execute([$user_id]);
+
+$activeGigs = $stmt->fetchColumn();
+
+/* =========================
+   COMPLETED JOBS
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM applications
+    WHERE student_id = ?
+    AND status = 'completed'
+");
+
+$stmt->execute([$user_id]);
+
+$completedJobs = $stmt->fetchColumn();
+
+/* =========================
+   TOTAL EARNINGS
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT COALESCE(SUM(amount),0)
+    FROM transactions
+    WHERE user_id = ?
+    AND type IN ('payment_received', 'escrow_release')
+    AND status = 'success'
+");
+
+$stmt->execute([$user_id]);
+
+$totalEarnings = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("
+    SELECT COALESCE(SUM(amount),0)
+    FROM transactions
+    WHERE user_id = ?
+    AND type IN ('payment_received', 'escrow_release')
+    AND status = 'success'
+");
+
+$stmt->execute([$user_id]);
+
+$totalEarned = $stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,22 +162,50 @@ $skills = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4B2E83;
+            text-decoration: none;
+            font-weight: 600;
+            padding-left: 0.5rem;
+            padding-top:0.5rem;
+        }
+
+        .back-btn:hover {
+            opacity: .8;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
-    <header class="page-header" style="padding: 1rem;">
-        <a href="../jobs/view_applications.php?job_id=<?= $job_id ?>" class="back-button">
+    <!-- <header class="page-header" style="padding: 1rem;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
             Back to previous page
         </a>
-    </header>
-    
+    </header> -->
+
+    <!-- <div class="mb-6">
+        <a href="javascript:history.back()" class="back-btn">
+            ← Back
+        </a>
+    </div> -->
+
     <!-- Main Content -->
     <div class="main-content">
-        
+        <a href="javascript:history.back()" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+        </a>
+
         <div class="container">
             <!-- Profile Header -->
             <div class="profile-header">
@@ -116,25 +243,26 @@ $skills = $stmt->fetchAll();
                                         <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
                                         <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
                                     </svg>
-                                    University of Washington
+                                    Covenant University
                                 </p>
                             </div>
 
                             <!-- Action Button -->
-                           <?php if ($_SESSION['role'] === 'student'): ?>
+                            <?php if ($_SESSION['role'] === 'student'): ?>
 
-                                <button class="btn-primary">
+                                <a class="btn-primary" href="student-profile-setup.php">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                     </svg>
                                     Edit Profile
-                                </button>
+                                </a>
 
                             <?php endif; ?>
                         </div>
 
-                        <p class="bio">Computer Science Student | Full-Stack Developer</p>
+
+                        <p class="bio"><?= htmlspecialchars($student['department']) ?></p>
 
                         <!-- Quick Stats -->
                         <div class="quick-stats">
@@ -156,11 +284,11 @@ $skills = $stmt->fetchAll();
                                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                                     </svg>
                                 </div>
-                                <span class="rating-value">4.8</span>
-                                <span class="rating-count">(12 reviews)</span>
+                                <span class="rating-value"><?= number_format((float)($student['rating'] ?? 0), 1) ?></span>
+                                <span class="rating-count">(<?= number_format((float)($reviews_count)) ?> reviews)</span>
                             </div>
                             <div class="divider"></div>
-                            <div class="stat-text">12 jobs completed</div>
+                            <div class="stat-text"><?= $completedJobs ?> jobs completed</div>
                         </div>
                     </div>
                 </div>
@@ -182,21 +310,21 @@ $skills = $stmt->fetchAll();
                     <div class="card">
                         <h2 class="card-title">Skills & Expertise</h2>
                         <?php if ($skills): ?>
-                        <div class="skills-grid">
-                           <?php foreach ($skills as $skill): ?>
+                            <div class="skills-grid">
+                                <?php foreach ($skills as $skill): ?>
 
-                            <span class="skill-tag">
-                            <?= htmlspecialchars($skill['name']) ?>
-                            </span>
+                                    <span class="skill-tag">
+                                        <?= htmlspecialchars($skill['name']) ?>
+                                    </span>
 
-                            <?php endforeach; ?>
-                        </div>
+                                <?php endforeach; ?>
+                            </div>
                         <?php else: ?>
 
-                        <p class="text-gray-500 text-sm">No skills added yet.</p>
+                            <p class="text-gray-500 text-sm">No skills added yet.</p>
 
                         <?php endif; ?>
-                                            </div>
+                    </div>
 
                     <!-- Education Section -->
                     <div class="card">
@@ -208,8 +336,8 @@ $skills = $stmt->fetchAll();
                                     <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
                                 </svg>
                                 <div>
-                                    <p class="education-title">University of Washington</p>
-                                    <p class="education-subtitle">Computer Science & Engineering</p>
+                                    <p class="education-title">Covenant University</p>
+                                    <p class="education-subtitle"><?= htmlspecialchars($student['department']) ?></p>
                                 </div>
                             </div>
                             <div class="education-item">
@@ -230,118 +358,101 @@ $skills = $stmt->fetchAll();
                     <div class="card">
                         <h2 class="card-title">Reviews & Feedback</h2>
                         <div class="reviews-list">
-                            <!-- Review 1 -->
-                            <div class="review-item">
-                                <div class="review-header">
-                                    <div class="reviewer-info">
-                                        <div class="reviewer-avatar">P</div>
-                                        <div>
-                                            <p class="reviewer-name">Prof. Michael Torres</p>
-                                            <div class="reviewer-meta">
-                                                <span class="role-badge role-lecturer">Lecturer</span>
-                                                <span class="review-date">2 weeks ago</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="stars">
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="review-project">Research Data Dashboard</p>
-                                <p class="review-text">
-                                    Excellent work on the research data visualization project. Sarah delivered ahead of 
-                                    schedule and incorporated feedback professionally.
-                                </p>
-                            </div>
 
-                            <!-- Review 2 -->
-                            <div class="review-item">
-                                <div class="review-header">
-                                    <div class="reviewer-info">
-                                        <div class="reviewer-avatar">T</div>
-                                        <div>
-                                            <p class="reviewer-name">TechStart Solutions</p>
-                                            <div class="reviewer-meta">
-                                                <span class="role-badge role-company">Company</span>
-                                                <span class="review-date">1 month ago</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="stars">
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="review-project">Landing Page Redesign</p>
-                                <p class="review-text">
-                                    Very impressed with the quality of work. Professional communication and clean code delivery.
-                                </p>
-                            </div>
+                            <?php foreach ($reviews as $review): ?>
 
-                            <!-- Review 3 -->
-                            <div class="review-item">
-                                <div class="review-header">
-                                    <div class="reviewer-info">
-                                        <div class="reviewer-avatar">D</div>
-                                        <div>
-                                            <p class="reviewer-name">Dr. Emily Richardson</p>
-                                            <div class="reviewer-meta">
-                                                <span class="role-badge role-lecturer">Lecturer</span>
-                                                <span class="review-date">1 month ago</span>
+                                <?php
+
+                                $words = preg_split('/\s+/', trim($review['reviewer_name']));
+                                $initials = '';
+
+                                foreach ($words as $word) {
+                                    $initials .= strtoupper(substr($word, 0, 1));
+
+                                    if (strlen($initials) >= 2) {
+                                        break;
+                                    }
+                                }
+
+                                ?>
+
+                                <div class="review-item">
+
+                                    <div class="review-header">
+
+                                        <div class="reviewer-info">
+
+                                            <div class="reviewer-avatar">
+                                                <?= htmlspecialchars($initials) ?>
                                             </div>
+
+                                            <div>
+
+                                                <p class="reviewer-name">
+                                                    <?= htmlspecialchars($review['reviewer_name']) ?>
+                                                </p>
+
+                                                <div class="reviewer-meta">
+
+                                                    <span class="role-badge role-<?= strtolower($review['reviewer_role']) ?>">
+                                                        <?= ucfirst($review['reviewer_role']) ?>
+                                                    </span>
+
+                                                    <span class="review-date">
+                                                        <?= date('M j, Y', strtotime($review['created_at'])) ?>
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
                                         </div>
+
+                                        <div class="stars">
+
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+
+                                                <svg
+                                                    class="<?= $i <= $student['rating'] ? 'star-filled' : 'star-empty' ?>"
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                    stroke="currentColor"
+                                                    stroke-width="2">
+
+                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+
+                                                </svg>
+
+                                            <?php endfor; ?>
+
+                                        </div>
+
                                     </div>
-                                    <div class="stars">
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg class="star-empty" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                    </div>
+
+                                    <p class="review-project">
+                                        <?= htmlspecialchars($review['job_title'] ?? 'Completed Project') ?>
+                                    </p>
+
+                                    <p class="review-text">
+                                        <?= nl2br(htmlspecialchars($review['comment'])) ?>
+                                    </p>
+
                                 </div>
-                                <p class="review-project">Course Management System</p>
-                                <p class="review-text">
-                                    Good work overall. Met all requirements and was responsive to questions.
-                                </p>
-                            </div>
+
+                            <?php endforeach; ?>
+
                         </div>
+                        <?php if (empty($reviews)): ?>
+
+                            <div class="review-item">
+                                <p class="review-text">
+                                    No reviews yet.
+                                </p>
+                            </div>
+
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -352,7 +463,7 @@ $skills = $stmt->fetchAll();
                         <h2 class="card-title">Activity & Stats</h2>
                         <div class="stats-list">
                             <!-- Jobs Posted -->
-                            <div class="stat-item">
+                            <!-- <div class="stat-item">
                                 <div class="stat-left">
                                     <div class="stat-icon stat-icon-blue">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -363,7 +474,7 @@ $skills = $stmt->fetchAll();
                                     <span class="stat-label">Jobs Posted</span>
                                 </div>
                                 <span class="stat-value">3</span>
-                            </div>
+                            </div> -->
 
                             <!-- Jobs Completed -->
                             <div class="stat-item">
@@ -376,9 +487,8 @@ $skills = $stmt->fetchAll();
                                     </div>
                                     <span class="stat-label">Jobs Completed</span>
                                 </div>
-                                <span class="stat-value">12</span>
+                                <span class="stat-value"><?= $completedJobs ?></span>
                             </div>
-
                             <!-- Ongoing Projects -->
                             <div class="stat-item">
                                 <div class="stat-left">
@@ -390,7 +500,7 @@ $skills = $stmt->fetchAll();
                                     </div>
                                     <span class="stat-label">Ongoing Projects</span>
                                 </div>
-                                <span class="stat-value">2</span>
+                                <span class="stat-value"><?= $activeGigs ?></span>
                             </div>
 
                             <!-- Average Rating -->
@@ -404,7 +514,7 @@ $skills = $stmt->fetchAll();
                                     <span class="stat-label">Average Rating</span>
                                 </div>
                                 <div class="rating-stat">
-                                    <span class="stat-value">4.8</span>
+                                    <span class="stat-value"><?= number_format((float)($student['rating'] ?? 0), 1) ?></span>
                                     <svg class="star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
                                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                                     </svg>
@@ -422,7 +532,7 @@ $skills = $stmt->fetchAll();
                                     </div>
                                     <span class="stat-label">Total Earnings</span>
                                 </div>
-                                <span class="stat-value">$3,450</span>
+                                <span class="stat-value"><?= $totalEarned ?></span>
                             </div>
                         </div>
                     </div>

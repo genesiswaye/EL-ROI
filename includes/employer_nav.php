@@ -182,65 +182,87 @@ if (isset($_SESSION['user_id'])) {
     }
 
     .notification-btn {
-    position: relative;
+        position: relative;
 
-    width: 46px;
-    height: 46px;
+        width: 46px;
+        height: 46px;
 
-    border-radius: 14px;
+        border-radius: 14px;
 
-    background: #f8fafc;
+        background: #f8fafc;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    color: #334155;
+        color: #334155;
 
-    transition: all 0.2s ease;
-}
+        transition: all 0.2s ease;
+    }
 
-.notification-btn:hover {
-    background: #eef2ff;
+    .notification-btn:hover {
+        background: #eef2ff;
 
-    color: #2563eb;
+        color: #2563eb;
 
-    transform: translateY(-2px);
-}
+        transform: translateY(-2px);
+    }
 
-.notification-badge {
-    position: absolute;
+    .notification-badge {
+        position: absolute;
 
-    top: -6px;
-    right: -6px;
+        top: -6px;
+        right: -6px;
 
-    min-width: 22px;
-    height: 22px;
+        min-width: 22px;
+        height: 22px;
 
-    padding: 0 6px;
+        padding: 0 6px;
 
-    border-radius: 999px;
+        border-radius: 999px;
 
-    background: linear-gradient(
-        135deg,
-        #ef4444,
-        #dc2626
-    );
+        background: linear-gradient(135deg,
+                #ef4444,
+                #dc2626);
 
-    color: white;
+        color: white;
 
-    font-size: 11px;
-    font-weight: 700;
+        font-size: 11px;
+        font-weight: 700;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    border: 3px solid white;
+        border: 3px solid white;
 
-    box-shadow:
-        0 4px 12px rgba(239,68,68,0.35);
-}
+        box-shadow:
+            0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+
+    .chatbot-btn {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        position: relative;
+
+        color: inherit;
+
+        transition: .2s ease;
+
+    }
+
+    .chatbot-btn:hover {
+
+        transform: scale(1.05);
+
+        color: #4F7CFF;
+
+    }
 
     @media (max-width:1024px) {
         .dropdown {
@@ -280,7 +302,7 @@ if (isset($_SESSION['user_id'])) {
             <div class="nav-content">
 
                 <!-- Logo -->
-                <div class="logo">CampusLink</div>
+                <div class="logo">studentLancer</div>
                 <?php
                 $base = "/EL-ROI"; // or your project root
                 ?>
@@ -311,7 +333,7 @@ if (isset($_SESSION['user_id'])) {
                             class="nav-link <?= ($activePage == 'my_jobs') ? 'nav-link-active' : '' ?>" style="padding-bottom: 3px;">
                             My Jobs
                         </a>
-                        <div class="dropdown-menu">
+                        <div class="dropdown-menu" style="right: -70px; left: auto;">
 
                             <a href="<?= $base ?>/jobs/my_jobs.php">Open Jobs</a>
 
@@ -337,6 +359,47 @@ if (isset($_SESSION['user_id'])) {
                         class="nav-link <?= ($activePage == 'wallet') ? 'nav-link-active' : '' ?>">
                         Wallet
                     </a>
+                    <div class="dropdown">
+                        <a href="#"
+                            class="nav-link <?= ($activePage == 'settings') ? 'nav-link-active' : '' ?>" style="padding-bottom: 3px;">Settings</a>
+                        <div class="dropdown-menu" style="right: -70px; left: auto;">
+
+                            <?php if ($role === 'student'): ?>
+
+                                <a href="<?= $base ?>/profile/view_student_profile.php">
+                                    My Profile
+                                </a>
+
+                            <?php endif; ?>
+                            <?php
+
+                            $profileLink = '#';
+
+                            switch ($_SESSION['role']) {
+
+                                case 'student':
+                                    $profileLink = $base . '/profile/student-profile-setup.php';
+                                    break;
+
+                                case 'lecturer':
+                                    $profileLink = $base . '/profile/lecturer-profile-setup.php';
+                                    break;
+                            }
+
+                            ?>
+
+                            <?php if ($_SESSION['role'] !== 'company'): ?>
+
+                                <a href="<?= $profileLink ?>">
+                                    Edit Profile
+                                </a>
+
+                            <?php endif; ?>
+
+                            <a href="<?= $base ?>/auth/logout.php">Logout</a>
+
+                        </div>
+                    </div>
                     <a
                         href="../notifications/index.php"
                         class="nav-link <?= ($activePage == 'notifications') ? 'nav-link-active' : '' ?>">
@@ -365,6 +428,63 @@ if (isset($_SESSION['user_id'])) {
                                 </span>
 
                             <?php endif; ?>
+
+                        </div>
+
+                    </a>
+                    <a
+                        href="../AI/frontend/chatbot.php"
+                        class="nav-link <?= ($activePage == 'chatbot') ? 'nav-link-active' : '' ?>">
+
+                        <div class="chatbot-btn">
+
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2">
+
+                                <!-- Robot head -->
+                                <rect
+                                    x="5"
+                                    y="7"
+                                    width="14"
+                                    height="10"
+                                    rx="3">
+                                </rect>
+
+                                <!-- Eyes -->
+                                <circle
+                                    cx="9"
+                                    cy="12"
+                                    r="1">
+                                </circle>
+
+                                <circle
+                                    cx="15"
+                                    cy="12"
+                                    r="1">
+                                </circle>
+
+                                <!-- Mouth -->
+                                <path
+                                    d="M9 15H15">
+                                </path>
+
+                                <!-- Antenna -->
+                                <path
+                                    d="M12 3V7">
+                                </path>
+
+                                <circle
+                                    cx="12"
+                                    cy="2"
+                                    r="1">
+                                </circle>
+
+                            </svg>
 
                         </div>
 

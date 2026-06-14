@@ -1,8 +1,3 @@
-from chatbot.memory import (
-    get_history,
-    save_message
-)
-
 from chatbot.prompt import (
     SYSTEM_PROMPT
 )
@@ -13,6 +8,8 @@ from chatbot.intents import (
 
 from database import (
 
+    get_history,
+    save_message,
     get_wallet_balance,
     get_completed_jobs,
     get_pending_withdrawals
@@ -40,7 +37,35 @@ async def process_chat(
             user_id
         )
 
-        return f"Your wallet balance is ₦{balance}"
+        reply = f"""
+
+        Your wallet balance is:
+
+        ₦{balance}
+
+        """
+
+        save_message(
+
+                user_id,
+
+                "user",
+
+                message
+
+            )
+
+        save_message(
+
+                user_id,
+
+                "assistant",
+
+                reply
+
+            )
+
+        return reply
 
 
     # COMPLETED JOBS
@@ -51,7 +76,36 @@ async def process_chat(
             user_id
         )
 
-        return f"You have completed {jobs} jobs."
+    
+        reply = f"""
+
+        You have completed:
+
+        {jobs} jobs.
+
+        """
+
+        save_message(
+
+                user_id,
+
+                "user",
+
+                message
+
+            )
+
+        save_message(
+
+                user_id,
+
+                "assistant",
+
+                reply
+
+            )
+
+        return reply
 
 
     # PENDING WITHDRAWALS
@@ -62,8 +116,95 @@ async def process_chat(
             user_id
         )
 
-        return f"You currently have ₦{pending} in pending withdrawals."
+        reply = f"""
 
+        You currently have:
+
+        ₦{pending} in pending withdrawals.
+
+        """
+
+        save_message(
+
+                user_id,
+
+                "user",
+
+                message
+
+            )
+
+        save_message(
+
+                user_id,
+
+                "assistant",
+
+                reply
+
+            )
+
+        return reply
+    
+
+
+    if intent=="withdrawal_help":
+
+        reply = """
+
+        Withdrawal Process:
+
+        1. Open Wallet
+
+        2. Click Withdraw
+
+        3. Enter amount
+
+        4. Select bank account
+
+        5. Submit request
+
+        Funds move into withdrawal hold.
+
+        Admins review requests.
+
+        Approved:
+
+        Money leaves platform.
+
+        Rejected:
+
+        Funds return to wallet.
+
+        Minimum withdrawal:
+
+        ₦5000
+
+        Processing depends on admin approval.
+
+        """
+
+        save_message(
+
+            user_id,
+
+            "user",
+
+            message
+
+        )
+
+        save_message(
+
+            user_id,
+
+            "assistant",
+
+            reply
+
+        )
+
+        return reply
 
     # AI SECTION
 
@@ -98,39 +239,58 @@ async def process_chat(
         }
 
     )
+    import time
 
-    response = ollama.chat(
+    start = time.time()
+    try:
 
-        model="qwen2.5:1.5b",
+        response = ollama.chat(
 
-        messages=messages,
+            model="qwen2.5:1.5b",
 
-        options={
+            messages=messages,
 
-            "num_predict":100,
-            "temperature":0.5,
-            "num_ctx":2048
+            options={
 
-        }
+                "num_predict":700,
+                "temperature":0.5,
+                "num_ctx":4096
 
+            }
+
+        )
+        print(
+        "OLLAMA TIME:",
+        round(time.time() - start, 2),
+        "seconds"
     )
 
-    reply = response[
-        "message"
-    ][
-        "content"
-    ]
+        reply = response["message"]["content"]
 
-    save_message(
-        user_id,
-        "user",
-        message
-    )
+        save_message(user_id, "user", message)
 
-    save_message(
-        user_id,
-        "assistant",
-        reply
-    )
+        save_message(
 
-    return reply
+            user_id,
+            "assistant",
+            reply
+
+        )
+
+        return reply
+
+    except Exception as e:
+
+        print(
+
+            "OLLAMA ERROR:",
+
+            e
+
+        )
+
+        return (
+
+            "AI temporarily unavailable."
+
+        )

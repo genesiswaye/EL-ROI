@@ -432,7 +432,7 @@ mt-2">
                                     AI Match:
 
                                     <?= number_format(
-                                        $app['ai_score'],
+                                        $final_score,
                                         2
                                     ) ?>%
 

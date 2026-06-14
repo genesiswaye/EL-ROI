@@ -76,18 +76,14 @@ if ($tab === 'posted') {
         ON jobs.created_by = employer_user.id
 
         WHERE jobs.created_by = ?
-AND applications.status IN ('accepted', 'pending', 'in_progress', 'completed', 'submitted', 'rejected' )
+    AND applications.status IN ('accepted','in_progress', 'completed', 'submitted')
 
-        ORDER BY
-COALESCE(
-    (
-        SELECT MAX(messages.created_at)
-        FROM messages
-        WHERE messages.application_id = applications.id
-    ),
-    applications.created_at
-) DESC
-    ");
+            ORDER BY
+    COALESCE(
+        (
+            SELECT MAX(messages.created_at)
+            FROM messages
+        WHERE messages.application_id = applications.id), applications.created_at) DESC");
 
     $stmt->execute([$user_id]);
 } else {
@@ -120,6 +116,12 @@ COALESCE(
         ON jobs.created_by = employer_user.id
 
         WHERE applications.student_id = ?
+            AND applications.status IN (
+                'accepted',
+                'in_progress',
+                'submitted',
+                'completed'
+            )
 
      ORDER BY
 COALESCE(
@@ -879,6 +881,30 @@ if (empty($activeApp)) {
                 overlay.classList.remove('active');
             });
         });
+        const applicationId = <?= json_encode($activeApp['application_id'] ?? null) ?>;
+
+        function fetchMessages() {
+
+            if (!applicationId) return;
+
+            fetch('fetch_messages.php?application_id=' + applicationId)
+                .then(response => response.text())
+                .then(data => {
+
+                    const container =
+                        document.getElementById('messages-container');
+
+                    if (container.innerHTML.trim() !== data.trim()) {
+
+                        container.innerHTML = data;
+
+                        container.scrollTop =
+                            container.scrollHeight;
+                    }
+                });
+        }
+
+        setInterval(fetchMessages, 2000);
     </script>
 </body>
 

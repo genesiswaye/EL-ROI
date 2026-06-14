@@ -13,7 +13,7 @@
 <body class="flex items-center justify-center h-screen">
     <div style="padding: 2rem;" class="bg-white rounded-lg shadow-md w-full max-w-md">
         <div class="flex items-center justify-center">
-            <img src="../assets/campuslink logo.jpg" alt="Logo for website" class="w-20">
+            <img src="../assets/studentLancerlogo.jpg" alt="Logo for website" class="w-20">
         </div>
         <h2 class="text-left text-[#1F2933] text-[2rem] mb-2 font-semibold">Create an account</h2>
         <p style="margin-bottom: 2rem; margin-top:0.5rem;" class="text-[#6B7280] text-[1rem] mb-3">Join CampusLink to get started</p>
@@ -46,7 +46,7 @@
                     </label>
                     <label class="role-option">
                         <input type="radio" name="role" value="company" onchange="toggleStudentFields()">
-                        <div class="role-card">
+                        <a href="company_register.php" class="role-card">
                             <svg class="role-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect>
                                 <path d="M9 22v-4h6v4"></path>
@@ -61,7 +61,7 @@
                                 <path d="M8 14h.01"></path>
                             </svg>
                             <span class="role-label">Company</span>
-                        </div>
+                        </a>
                     </label>
                 </div>
             </div>

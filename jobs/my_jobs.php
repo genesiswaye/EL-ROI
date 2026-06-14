@@ -14,6 +14,7 @@ $stmt = $pdo->prepare("
 SELECT id, title, category, budget, deadline, status, created_at
 FROM jobs
 WHERE created_by = ?
+AND is_deleted = 0
 AND status = 'open'
 ORDER BY created_at DESC
 ");

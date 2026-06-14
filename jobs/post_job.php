@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "../config/database.php";
+require_once "../AI/update_old_application_ai.php";
 
 
 if (!isset($_SESSION['user_id'])) {
@@ -139,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ");
 
             $stmt->execute([$skill]);
+            // runRecommendations();
 
             /* GET SKILL ID */
 

@@ -32,6 +32,8 @@ applications.job_id,
 
 users.full_name,
 users.email,
+users.rating AS rating,
+users.id AS student_id,
 
 student_profiles.department,
 student_profiles.level,
@@ -70,6 +72,73 @@ if ($proposal['created_by'] != $user_id) {
 }
 
 
+$student_id = $proposal['student_id'];
+// $student_rating = $proposal['rating'];
+
+$stmt = $pdo->prepare("
+    SELECT
+        student_profiles.user_id,
+        student_profiles.department,
+        student_profiles.matric_num,
+        student_profiles.level,
+        student_profiles.bio,
+        users.full_name,
+        users.rating AS rating,
+        users.role
+    FROM student_profiles
+    JOIN users
+        ON student_profiles.user_id = users.id
+    WHERE student_profiles.user_id = ?
+");
+
+$stmt->execute([$student_id]);
+
+$student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("
+    SELECT COALESCE(SUM(amount),0)
+    FROM transactions
+    WHERE user_id = ?
+    AND type IN ('payment_received', 'escrow_release')
+    AND status = 'success'
+");
+
+$stmt->execute([$student_id]);
+
+$totalEarned = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM applications
+    WHERE student_id = ?
+    AND status = 'completed'
+");
+
+$stmt->execute([$student_id]);
+
+$completedJobs = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM applications
+    WHERE student_id = ?
+    AND status IN ('accepted', 'in_progress')
+");
+
+$stmt->execute([$student_id]);
+
+$activeGigs = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM reviews
+    WHERE reviewee_id = ?
+    
+");
+
+$stmt->execute([$student_id]);
+
+$reviews_count = $stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,6 +151,22 @@ if ($proposal['created_by'] != $user_id) {
     <link rel="stylesheet" href="view_proposals.css">
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4B2E83;
+            text-decoration: none;
+            font-weight: 600;
+            padding-left: 0.5rem;
+            padding-top:0.5rem;
+        }
+
+        .back-btn:hover {
+            opacity: .8;
+        }
+    </style>
 </head>
 
 <body>
@@ -89,12 +174,12 @@ if ($proposal['created_by'] != $user_id) {
         <!-- Page Header -->
         <header class="page-header">
             <div class="container">
-                <a href="view_applications.php?job_id=<?= $proposal['job_id'] ?>" class="back-button">
+                <a href="javascript:history.back()" class="back-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
-                    Back to previous page
+                    Back
                 </a>
                 <div class="header-content">
                     <h1>Proposal for: <?= htmlspecialchars($proposal['title']) ?></h1>
@@ -266,7 +351,7 @@ if ($proposal['created_by'] != $user_id) {
                                         </div>
                                         <span>Completed Jobs</span>
                                     </div>
-                                    <span class="stat-value">12</span>
+                                    <span class="stat-value"><?= $completedJobs ?></span>
                                 </div>
 
                                 <!-- Ongoing Projects -->
@@ -277,7 +362,7 @@ if ($proposal['created_by'] != $user_id) {
                                         </div>
                                         <span>Ongoing Projects</span>
                                     </div>
-                                    <span class="stat-value">2</span>
+                                    <span class="stat-value"><?= $activeGigs ?></< /span>
                                 </div>
 
                                 <!-- Average Rating -->
@@ -289,8 +374,8 @@ if ($proposal['created_by'] != $user_id) {
                                         <span>Average Rating</span>
                                     </div>
                                     <div class="rating-value">
-                                        <span class="stat-value">4.8</span>
-                                        <i data-lucide="star" class="star-icon"></i>
+                                        <span class="stat-value"><?= number_format((float)($student['rating'] ?? 0), 1) ?></< /span>
+                                            <i data-lucide="star" class="star-icon"></i>
                                     </div>
                                 </div>
 
@@ -302,7 +387,7 @@ if ($proposal['created_by'] != $user_id) {
                                         </div>
                                         <span>Reviews</span>
                                     </div>
-                                    <span class="stat-value">12</span>
+                                    <span class="stat-value"><?= number_format((float)($reviews_count)) ?></span>
                                 </div>
                             </div>
                         </div>
@@ -328,8 +413,9 @@ if ($proposal['created_by'] != $user_id) {
                                 <form action="reject_application.php" method="POST">
                                     <div class="decision-buttons">
                                         <input type="hidden" name="proposal_id" value="<?= $proposal['id'] ?>">
+                                        <input type="hidden" name="job_id" value="<?= $proposal['job_id'] ?>">
                                         <!-- Accept Button -->
-                                        <button class="decision-button decision-reject">
+                                        <button type="submit" class="decision-button decision-reject"  onclick="return confirm('Reject this application?')">
                                             <i data-lucide="x"></i>
                                             Reject Proposal
                                         </button>
@@ -358,17 +444,17 @@ if ($proposal['created_by'] != $user_id) {
         // Initialize Lucide icons
         lucide.createIcons();
 
-      function acceptJob(button) {
+        function acceptJob(button) {
 
-    if (button.disabled) {
-        return;
-    }
+            if (button.disabled) {
+                return;
+            }
 
-    button.disabled = true;
-    button.innerText = "Processing...";
+            button.disabled = true;
+            button.innerText = "Processing...";
 
-    button.form.submit();
-}
+            button.form.submit();
+        }
     </script>
 </body>
 

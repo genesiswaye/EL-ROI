@@ -149,6 +149,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt->execute([$submission['application_id']]);
 
+            /* update completed jobs */
+            $stmt = $pdo->prepare("
+        
+        UPDATE users
+        SET completed_jobs = completed_jobs + 1
+        WHERE id = ?
+        ");
+
+            $stmt->execute([$submission['student_id']]);
+            require_once "../AI/run_recommendations.php";
+
+            runRecommendations();
+
             /* 6. UPDATE JOB */
 
             $stmt = $pdo->prepare("
@@ -180,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Employer approved submitted work and released escrow'
             );
 
-            header("Location: ../messages/messages.php?application_id=" . $submission['application_id']);
+            header("Location: ../ratings/ratings.php?application_id=" . $submission['application_id']);
             exit();
         } catch (Exception $e) {
 

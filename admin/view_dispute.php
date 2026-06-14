@@ -93,7 +93,7 @@ if (
 
     <meta charset="UTF-8">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../dist/output.css">
 
     <title>
 
@@ -394,7 +394,7 @@ rounded
                     value="partial_refund"
 
                     class="
-bg-yellow-600
+bg-red-600
 text-white
 px-5
 py-3

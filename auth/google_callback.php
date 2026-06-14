@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 session_start();
 
-$_SESSION['is_admin'] = $user['is_admin'] ?? 0;
+// $_SESSION['is_admin'] = $user['is_admin'] ?? 0;
 
 $client = new Google_Client();
 
@@ -100,6 +100,19 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+/* =========================
+   TERMS & CONDITIONS CHECK
+========================= */
+
+if (
+    !isset($user['terms_accepted']) ||
+    (int)$user['terms_accepted'] === 0
+) {
+
+    header("Location: ../terms/terms.php");
+    exit();
+}
+
 $_SESSION['is_admin'] = $user['is_admin'] ?? 0;
 
 /* ---------- STUDENT ---------- */
@@ -111,7 +124,7 @@ if ($role === "student") {
     $profile = $stmt->fetch();
 
     if (!$profile) {
-        header("Location: ../profile/setup_student.php");
+        header("Location: ../profile/student-profile-setup.php");
         exit();
     } else {
         header("Location: ../dashboard/overview.php");
@@ -128,9 +141,11 @@ if ($role === "student") {
     $profile = $stmt->fetch();
 
     if (!$profile) {
-        header("Location: ../profile/setup_lecturer.php");
+        header("Location: ../profile/lecturer-profile-setup.php");
+        exit();
     } else {
         header("Location: ../dashboard/overview.php");
+        exit();
     }
 }
 

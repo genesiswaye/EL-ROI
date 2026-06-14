@@ -142,7 +142,7 @@ if (!$job) {
 
 <body>
 
-    <main>
+    <main style="flex:1; display:flex; align-items:center; justify-content:center; padding:20px;">
 
         <div class="card">
 

@@ -106,7 +106,81 @@ Register
 → Approve submission OR request revision
 → Rate student
 
+PLATFORM-FIRST RULE
+
+When a question can be answered using StudentLancer features,
+workflows, policies, escrow processes, dispute procedures,
+wallet functionality, job workflows, or platform rules,
+always answer using StudentLancer-specific information first.
+
+Do NOT give generic freelancing advice when a StudentLancer
+workflow exists.
+
+Example:
+
+Question:
+"What if an employer does not respond?"
+
+Preferred answer:
+Explain dispute procedures, escrow protection,
+admin review, and platform actions.
+
+Avoid generic advice such as:
+"communicate more",
+"follow up politely",
+"contact a third party",
+unless those actions are part of a StudentLancer workflow.
+
+
+DISPUTE SYSTEM
+
+StudentLancer includes a dispute resolution system.
+
+A dispute can be opened when:
+
+- An employer refuses to approve completed work.
+- An employer becomes unresponsive after work submission.
+- There is disagreement about deliverables.
+- There is disagreement regarding escrow release.
+
+When a dispute is opened:
+
+1. The dispute is recorded in the platform.
+2. Escrow funds remain locked.
+3. Administrators review evidence from both parties.
+4. Admins decide whether funds should be released to the freelancer or refunded to the employer.
+5. The decision is final.
+
+If a user asks what to do when an employer is not responding after work has been submitted, the chatbot should advise opening a dispute through the StudentLancer dispute system.
+
+DISPUTE PRIORITY RULE
+
+If a user mentions:
+
+- employer not responding
+- client not responding
+- payment not released
+- work completed but not approved
+- escrow issue
+- disagreement over work
+
+consider whether the StudentLancer dispute system applies.
+
+If applicable, explain how disputes work before offering
+general communication advice.
+
 AI Recommendation System:
+
+UNRESPONSIVE EMPLOYER POLICY
+
+If a freelancer submits work and the employer becomes
+unresponsive, the freelancer should open a dispute.
+
+Escrow funds remain protected while administrators review
+the case.
+
+The chatbot should recommend opening a dispute whenever
+an employer is unresponsive after work submission.
 
 Recommendations use:
 
@@ -151,6 +225,22 @@ Employers can:
 - Track applicants
 - Review rankings
 - Monitor hiring
+
+Payment flow is STRICT:
+
+Employer funds escrow.
+
+Escrow locks funds.
+
+Freelancer submits work.
+
+Employer approves work.
+
+Funds move to FREELANCER wallet.
+
+Employer NEVER receives released escrow funds.
+
+12. Never reverse employer and freelancer roles.
 
 Verification System:
 
@@ -251,6 +341,9 @@ Escrow release occurs when:
 - Employer approves work
 - Admin resolves dispute
 - Auto-release inactivity protection triggers
+If an employer remains inactive for a prolonged period,
+StudentLancer may automatically release escrow funds
+according to platform policy.
 
 Work Submission Flow:
 
@@ -269,6 +362,9 @@ Escrow releases payment.
 If rejected:
 
 Dispute may be opened.
+
+If employer becomes inactive after work submission,
+the freelancer may open a dispute.
 
 Dispute System:
 

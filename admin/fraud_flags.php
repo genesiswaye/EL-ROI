@@ -1,14 +1,16 @@
 <?php
-session_start();
+
 
 require_once "../config/database.php";
 
-require "helper.php";
+// require "helper.php";
+// require "middleware.php";
 
-requireRole([
-    'support_admin',
-    'super_admin'
-]);
+
+// requireRole([
+//     'support_admin',
+//     'super_admin'
+// ]);
 
 /* =========================
    FILTERS
@@ -96,6 +98,10 @@ $activeCount = count(array_filter(
 </head>
 
 <body class="bg-gray-100 min-h-screen">
+    <?php
+    $activePage = "fraud_flags";
+    include "admins2.php";
+    ?>
 
 <div class="max-w-7xl mx-auto p-6">
 

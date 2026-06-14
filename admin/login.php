@@ -2,7 +2,7 @@
 
 session_start();
 
-include "../config/database.php";
+require "../config/database.php";
 
 $error = "";
 
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                 $admin['full_name'];
 
             header(
-                "Location: dashboard.php"
+                "Location: admin-dashboard.php"
             );
 
             exit();
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
 <body
     class="
-        bg-gradient-to-br
+        bg-linear-to-br
         from-blue-900
         to-blue-700
         min-h-screen

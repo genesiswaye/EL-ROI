@@ -225,4 +225,4 @@ as $app
 
 }
 
-echo "Old applications updated";
+// echo "Old applications updated";

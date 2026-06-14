@@ -88,35 +88,46 @@ $role = $stmt->fetchColumn();
 
 
 // Decide which profile table to use
+$bio = '';
+
 switch ($role) {
 
     case 'student':
-        $table = 'student_profiles';
+
+        $stmt = $pdo->prepare("
+            SELECT bio
+            FROM student_profiles
+            WHERE user_id = ?
+        ");
+
         break;
 
     case 'lecturer':
-        $table = 'lecturer_profiles';
+
+        $stmt = $pdo->prepare("
+            SELECT bio
+            FROM lecturer_profiles
+            WHERE user_id = ?
+        ");
+
         break;
 
     case 'company':
-        $table = 'company_profiles';
+
+        $stmt = $pdo->prepare("
+            SELECT description AS bio
+            FROM company_profiles
+            WHERE user_id = ?
+        ");
+
         break;
 
     default:
-        $table = null;
+
+        $stmt = null;
 }
 
-
-// Fetch the bio if a table exists
-$bio = '';
-
-if ($table) {
-
-    $stmt = $pdo->prepare("
-        SELECT bio 
-        FROM $table 
-        WHERE user_id = ?
-    ");
+if ($stmt) {
 
     $stmt->execute([$poster_id]);
 
@@ -163,6 +174,20 @@ $stmt = $pdo->prepare("
 $stmt->execute([$job_id]);
 
 $skills = $stmt->fetchAll();
+
+$stmt = $pdo->prepare("
+SELECT id
+FROM applications
+WHERE job_id = ?
+AND student_id = ?
+");
+
+$stmt->execute([
+    $job['id'],
+    $_SESSION['user_id']
+]);
+
+$already_applied = $stmt->fetch();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -177,21 +202,41 @@ $skills = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4B2E83;
+            text-decoration: none;
+            font-weight: 600;
+            padding-left: 0.5rem;
+            padding-top:0.5rem;
+        }
+
+        .back-btn:hover {
+            opacity: .8;
+        }
+    </style>
 </head>
 
 <body>
     <!-- Top Navigation -->
 
-
+    <!-- <div class="mb-6">
+        <a href="javascript:history.back()" class="back-btn">
+            ← Back
+        </a>
+    </div> -->
     <!-- Main Content -->
     <main class="main-content">
         <!-- Back Button -->
-        <a href="browse_jobs.php" class="back-button">
+        <a href="javascript:history.back()" class="back-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Back to Browse Projects
+            Back
         </a>
 
         <!-- Project Header -->
@@ -386,9 +431,9 @@ $skills = $stmt->fetchAll();
 
                     </div>
                     <?php if ($related_jobs): ?>
-                    <!-- loop -->
+                        <!-- loop -->
                     <?php else: ?>
-                    <p class="text-gray-500">No related projects found.</p>
+                        <p class="text-gray-500">No related projects found.</p>
                     <?php endif; ?>
                 </section>
             </div>
@@ -451,17 +496,26 @@ $skills = $stmt->fetchAll();
 
                     <!-- Apply Button -->
                     <div class="flex flex-col text-center">
-                        
+                        <?php if (!$already_applied): ?>
+
 
                             <?php if ($_SESSION['user_id'] != $job['created_by'] && $_SESSION['role'] === 'student'): ?>
 
                                 <a href="submit_proposal.php?job_id=<?= $job['id'] ?>" class="btn-apply">
-                                Apply for Job
+                                    Apply for Job
                                 </a>
 
                             <?php endif; ?>
+                        <?php else: ?>
+                            <button
+                                disabled
+                                class="bg-blue-300 text-gray-600 px-4 py-2 rounded cursor-not-allowed">
+                                Already Applied
+                            </button>
 
-                            <p class="apply-note">Only students can apply to projects</p>
+                        <?php endif; ?>
+
+                        <p class="apply-note">Only students can apply to projects</p>
 
                     </div>
                 </div>

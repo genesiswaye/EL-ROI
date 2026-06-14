@@ -19,7 +19,7 @@
 <body class="flex items-center justify-center h-screen">
     <div style="padding: 2rem;" class="bg-white rounded-lg shadow-md w-full max-w-md">
         <div style="margin-bottom: 5rem;" class="flex items-center justify-center">
-            <img src="../assets/campuslink logo.jpg" alt="Logo for website" class="w-20 mb-4">
+            <img src="../assets/studentLancerlogo.jpg" alt="Logo for website" class="w-20 mb-4">
         </div>
        <div class="flex justify-center mt-6">
     
