@@ -23,7 +23,7 @@
         </div>
        <div class="flex justify-center mt-6">
     
-    <a href="/EL-ROI/auth/google_login.php" style="padding: 0.75rem; "
+    <a href="../auth/google_login.php" style="padding: 0.75rem; "
        class="flex items-center justify-center gap-3 w-full border border-gray-300 rounded py-3 hover:bg-gray-50 transition">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22">
