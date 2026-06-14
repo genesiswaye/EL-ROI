@@ -4,6 +4,8 @@ venv/
 AI/winvenv/
 AI/venv/
 
+auth/secret.json
+
 __pycache__/
 
 *.log
@@ -15,6 +17,7 @@ node_modules/
 vendor/
 
 *.sql
+
 
 *.pkl
 
