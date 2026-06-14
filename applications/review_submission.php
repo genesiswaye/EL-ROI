@@ -158,9 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
 
             $stmt->execute([$submission['student_id']]);
-            require_once "../AI/run_recommendations.php";
+            // require_once "../AI/run_recommendations.php";
 
-            runRecommendations();
+            // runRecommendations();
 
             /* 6. UPDATE JOB */
 

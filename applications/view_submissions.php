@@ -3,11 +3,11 @@ session_start();
 require_once "../config/database.php";
 require_once "../includes/auth_guard.php";
 
-// if (!isset($_SESSION['user_id'])) {
-//     die("Unauthorized access");
-// }
+if (!isset($_SESSION['user_id'])) {
+    die("Unauthorized access");
+}
 
-// $employer_id = (int) $_SESSION['user_id'];
+$employer_id = (int) $_SESSION['user_id'];
 
 if (!isset($_GET['submission_id'])) {
     die("Submission not specified");
@@ -47,7 +47,7 @@ JOIN jobs
 WHERE work_submissions.id = ? AND jobs.created_by = ?
 ");
 
-$stmt->execute([$submission_id, $user_id]);
+$stmt->execute([$submission_id, $employer_id]);
 $submission = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $return_url =
@@ -102,16 +102,32 @@ function formatFileSize($bytes)
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4B2E83;
+            text-decoration: none;
+            font-weight: 600;
+            padding-left: 0.5rem;
+            padding-top:0.5rem;
+        }
+
+        .back-btn:hover {
+            opacity: .8;
+        }
+    </style>
 </head>
 
 <body>
     <div class="page">
-        <a href="../messages/messages.php?application_id=<?= $submission['application_id'] ?>" class="back-link">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="javascript:history.back()" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Back to previous page
+            Back
         </a>
 
         <div class="card">

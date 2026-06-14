@@ -1312,6 +1312,18 @@ footer {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
+     .nav-links {
+        gap: 18px;
+    }
+
+    .nav-links a {
+        font-size: 0.9rem;
+    }
+
+    .btn-login,
+    .btn-signup {
+        padding: 10px 16px;
+    }
     .features-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1369,7 +1381,7 @@ footer {
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
     .nav-links {
         display: none;
     }
@@ -1395,6 +1407,13 @@ footer {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 36px;
+    }
+    .nav-actions .btn-login,
+    .nav-actions .btn-signup {
+        display: none;
+    }
+    .nav-logo-text {
+        font-size: 1.1rem;
     }
 }
 
@@ -1446,4 +1465,16 @@ footer {
 
 .mobile-nav-btns button {
     width: 100%;
+}
+@media (max-width: 900px) {
+
+    .nav-links,
+    .nav-actions .btn-login,
+    .nav-actions .btn-signup {
+        display: none;
+    }
+
+    .nav-hamburger {
+        display: block;
+    }
 }

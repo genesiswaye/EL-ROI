@@ -184,7 +184,6 @@ foreach ($words as $word) {
   }
 }
 ?>
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -969,11 +968,7 @@ foreach ($words as $word) {
               <div class="char-counter" id="charCounter">0 / 600</div>
             </div>
 
-            <!-- TAGS -->
-            <div>
-              <div class="tags-label">Quick Feedback Tags</div>
-              <div class="tags-wrap" id="tagsWrap"></div>
-            </div>
+           
 
             <!-- NOTICE -->
             <div class="notice-card">
