@@ -25,8 +25,8 @@
         <a href="#how-it-works" onclick="closeMobileNav()">How It Works</a>
         <a href="#cta" onclick="closeMobileNav()">Contact</a>
         <div class="mobile-nav-btns">
-            <button class="btn-login" style="border:1px solid #e2e8f0;border-radius:12px;width:100%;">Login</button>
-            <button class="btn-signup" style="width:100%;padding:12px 0;">Sign Up</button>
+            <a href="auth/login_selector.php" class="btn-login" style="border:1px solid #e2e8f0;border-radius:12px;width:100%;">Login</a>
+            <a href="auth/register.php" class="btn-signup" style="width:100%;padding:12px 0;">Sign Up</a>
         </div>
     </div>
 
