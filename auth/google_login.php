@@ -1,11 +1,24 @@
 <?php
 require_once '../vendor/autoload.php';
 
+$config = json_decode(
+    file_get_contents(__DIR__ . '/secret.json'),
+    true
+);
+
 $client = new Google_Client();
 
-$client->setClientId("840221080643-an8np874f00nb74n99ot34fe5fdbskib.apps.googleusercontent.com");
-$client->setClientSecret("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");
-$client->setRedirectUri("http://localhost/EL-ROI/auth/google_callback.php");
+$client->setClientId(
+    $config['web']['client_id']
+);
+
+$client->setClientSecret(
+    $config['web']['client_secret']
+);
+
+$client->setRedirectUri(
+    $config['web']['redirect_uris'][0]
+);
 
 $client->addScope("openid");
 $client->addScope("email");

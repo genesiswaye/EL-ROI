@@ -118,7 +118,7 @@ try {
                             <?php if ($job['submission_id']): ?>
 
                                 <a
-                                    href="../applications/view_submissions.php?submission_id=<?= (int)$job['submission_id'] ?>&return=<?= urlencode('/EL-ROI/messages/messages.php') ?>"
+                                    href="../applications/view_submissions.php?submission_id=<?= (int)$job['submission_id'] ?>&return=<?= urlencode('/../messages/messages.php') ?>"
                                     class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
                                     View Submission
                                 </a>
