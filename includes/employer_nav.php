@@ -304,7 +304,8 @@ if (isset($_SESSION['user_id'])) {
                 <!-- Logo -->
                 <div class="logo">studentLancer</div>
                 <?php
-                $base = "/EL-ROI"; // or your project root
+                $base = "/studentlancer.net"; // or your project root
+                // $base = "EL-ROI"; // or your project root
                 ?>
 
                 <!-- Desktop Navigation -->
